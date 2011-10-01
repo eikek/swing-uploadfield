@@ -18,6 +18,7 @@ package org.eknet.swing.imagecomponent;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -38,14 +39,18 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -149,7 +154,23 @@ public class ImageInput extends JPanel {
       public void actionPerformed(ActionEvent e) {
         if (dialog == null) {
           Window parent = Utils.findWindow(proposalsButton);
-          dialog = new JDialog(parent, "Proposals");
+          dialog = new JDialog(parent, "Proposals", Dialog.ModalityType.APPLICATION_MODAL) {
+            @Override
+            protected JRootPane createRootPane() {
+              JRootPane rootPane = super.createRootPane();
+              KeyStroke escStroke = KeyStroke.getKeyStroke("ESCAPE");
+              InputMap map = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+              map.put(escStroke, "ESCAPE");
+              rootPane.getActionMap().put("ESCAPE", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  dialog.setVisible(false);
+                }
+              });
+              return rootPane;
+            }
+          };
           dialog.getContentPane().setLayout(new BorderLayout());
           dialog.getContentPane().add(iconViewer, BorderLayout.CENTER);
         }
@@ -160,7 +181,7 @@ public class ImageInput extends JPanel {
         bounds.width = 350;
         bounds.height = 250;
         dialog.setBounds(bounds);
-        dialog.setVisible(true);
+        dialog.setVisible(!dialog.isVisible());
       }
     });
 
