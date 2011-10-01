@@ -103,6 +103,7 @@ public class ImageInput extends JPanel {
   private Color errorMessageColor = Color.red;
   private IconViewer iconViewer = new IconViewer();
   private JDialog dialog;
+  private boolean documentListenerMuted = false;
 
   private JComponent glassPane = new SimpleGlassPane();
 
@@ -197,22 +198,26 @@ public class ImageInput extends JPanel {
     nameField.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
-        update();
+        update(e);
       }
 
       @Override
       public void removeUpdate(DocumentEvent e) {
-        update();
+        update(e);
       }
 
       @Override
       public void changedUpdate(DocumentEvent e) {
-        update();
+        update(e);
       }
 
-      private void update() {
+      private void update(DocumentEvent e) {
+        if (documentListenerMuted) {
+          return;
+        }
         String text = nameField.getText();
-        if (text == null || "".equals(text.trim())) {
+        String url = resourceField.getText();
+        if (url == null && (text == null || "".equals(text.trim()))) {
           setImage(null);
         } else {
           ImageValue value = createNewOrCopy();
@@ -384,6 +389,7 @@ public class ImageInput extends JPanel {
   }
 
   private void updateComponent(ImageValue value) {
+    documentListenerMuted = true;
     if (ImageValue.isNullOrEmpty(value)) {
       resourceField.setText(null);
       nameField.setText(null);
@@ -400,6 +406,7 @@ public class ImageInput extends JPanel {
       }
       setMessage(getImageDescription(value), false);
     }
+    documentListenerMuted = false;
   }
 
   public boolean isOptimizedDrawingEnabled() {

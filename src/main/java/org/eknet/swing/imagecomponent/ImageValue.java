@@ -76,10 +76,13 @@ public final class ImageValue implements Cloneable, Comparable<ImageValue> {
   public void setImageResource(URL imageResource) {
     URL old = getImageResource();
     this.imageResource = imageResource;
-    this.image = null;
-    this.imageFile = null;
-    this.icon = null;
     changeSupport.firePropertyChange("imageResource", old, imageResource);
+    if (getImageName() == null && imageResource != null) {
+      setImageName(Utils.lastUrlPart(imageResource));
+    }
+    setImage(null);
+    setImageFile(null);
+    setIcon(null);
   }
 
   public String getImageName() {
@@ -111,7 +114,7 @@ public final class ImageValue implements Cloneable, Comparable<ImageValue> {
     return image;
   }
 
-  public void setImage(BufferedImage image) {
+  public void setImage(@Nullable BufferedImage image) {
     BufferedImage old = getImage();
     this.image = image;
     changeSupport.firePropertyChange("image", old, image);
@@ -135,7 +138,7 @@ public final class ImageValue implements Cloneable, Comparable<ImageValue> {
     return imageFile;
   }
 
-  public void setImageFile(File imageFile) {
+  public void setImageFile(@Nullable File imageFile) {
     File old = getImageFile();
     this.imageFile = imageFile;
     changeSupport.firePropertyChange("imageFile", old, imageFile);
@@ -145,7 +148,7 @@ public final class ImageValue implements Cloneable, Comparable<ImageValue> {
     return icon;
   }
 
-  public void setIcon(Icon icon) {
+  public void setIcon(@Nullable Icon icon) {
     Icon old = getIcon();
     this.icon = icon;
     changeSupport.firePropertyChange("icon", old, icon);
