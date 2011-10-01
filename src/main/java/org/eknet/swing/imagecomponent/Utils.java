@@ -18,6 +18,7 @@ package org.eknet.swing.imagecomponent;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.math.BigDecimal;
 import java.net.URL;
 
 /**
@@ -53,5 +54,22 @@ final class Utils {
       c = c.getParent();
     }
     return null;
+  }
+
+  private final static double KB = 1024;
+  private final static double MB = KB * KB;
+
+  public static String toSizeString(double bytes) {
+    BigDecimal mb = null;
+    String unit;
+    if (bytes > MB) {
+      mb = new BigDecimal(bytes / MB);
+      unit = "Mb";
+    } else {
+      mb = new BigDecimal(bytes / KB);
+      unit = "Kb";
+    }
+    mb = mb.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+    return mb.toString() + " " + unit;
   }
 }

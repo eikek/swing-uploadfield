@@ -352,7 +352,7 @@ public class ImageInput  extends JComponent {
       if (value.getImage() != null) {
         buf.append("; ");
       }
-      buf.append(Scales.toSizeString(value.getImageFile().length()));
+      buf.append(Utils.toSizeString(value.getImageFile().length()));
     }
     return buf.toString();
   }

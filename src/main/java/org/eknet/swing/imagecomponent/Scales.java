@@ -20,7 +20,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import java.math.BigDecimal;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -135,20 +134,4 @@ class Scales {
     return ret;
   }
 
-  private final static double KB = 1024;
-  private final static double MB = KB * KB;
-  
-  public static String toSizeString(double bytes) {
-    BigDecimal mb = null;
-    String unit;
-    if (bytes > MB) {
-      mb = new BigDecimal(bytes / MB);
-      unit = "Mb";
-    } else {
-      mb = new BigDecimal(bytes / KB);
-      unit = "Kb";
-    }
-    mb = mb.setScale(2, BigDecimal.ROUND_HALF_EVEN);
-    return mb.toString() + " " + unit;
-  }
 }
