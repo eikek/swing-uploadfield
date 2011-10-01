@@ -47,6 +47,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.OverlayLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -64,19 +65,19 @@ import org.jetbrains.annotations.Nullable;
  * <p/>
  * It consists of the following:
  * <ul>
- *   <li>two text fields, one for the image url and one for an optional title for name</li>
- *   <li>a preview button, that shows the image. onclick a open-file-dialog is presented to choose a file
- *    from the file system</li>
- *   <li>optional, a set of predefined images can be specified. If so, a small button opens a
- *   component that allows the user to choose a image.</li>
- *   <li>a button to reset the form</li>
+ * <li>two text fields, one for the image url and one for an optional title for name</li>
+ * <li>a preview button, that shows the image. onclick a open-file-dialog is presented to choose a file
+ * from the file system</li>
+ * <li>optional, a set of predefined images can be specified. If so, a small button opens a
+ * component that allows the user to choose a image.</li>
+ * <li>a button to reset the form</li>
  * </ul>
  * It supports scaling the image to a specified height/width.
- * 
+ *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 15:24
  */
-public class ImageInput  extends JComponent {
+public class ImageInput extends JPanel {
 
   private static final Logger log = LoggerFactory.getLogger(ImageInput.class);
 
@@ -107,7 +108,7 @@ public class ImageInput  extends JComponent {
 
   private final MouseAdapter emptyMouseListener = new MouseAdapter() {};
   private final KeyAdapter emptyKeyListener = new KeyAdapter() {};
-  
+
   private ImageValue image;
 
   public ImageInput() {
@@ -132,13 +133,13 @@ public class ImageInput  extends JComponent {
         }
       }
     });
-    
+
     previewButton.setIcon(folderIcon);
     previewButton.setText("...");
     previewButton.addActionListener(newOpenImageAction());
     previewButton.setBackground(Color.white);
     previewButton.setToolTipText(getOpenButtonTooltip());
-    
+
     proposalsButton.setIcon(imagesIcon);
     proposalsButton.setText(null);
     proposalsButton.setVisible(false);
@@ -161,7 +162,7 @@ public class ImageInput  extends JComponent {
         dialog.setVisible(true);
       }
     });
-    
+
     resetButton.setIcon(resetIcon);
     resetButton.setText(null);
     resetButton.addActionListener(new ActionListener() {
@@ -222,8 +223,8 @@ public class ImageInput  extends JComponent {
         }
       }
     });
-    setGlassPane(new SimpleGlassPane());
     add(root, -1);
+    setGlassPane(new SimpleGlassPane());
   }
 
 
@@ -260,7 +261,9 @@ public class ImageInput  extends JComponent {
   }
 
   public void setGlassPane(JComponent glassPane) {
+    boolean visible = false;
     if (this.glassPane != null) {
+      visible = this.glassPane.isVisible();
       remove(this.glassPane);
     }
     this.glassPane = glassPane;
@@ -268,6 +271,7 @@ public class ImageInput  extends JComponent {
       add(this.glassPane, 0);
       this.glassPane.addMouseListener(emptyMouseListener);
       this.glassPane.addKeyListener(emptyKeyListener);
+      this.glassPane.setVisible(visible);
     }
   }
 
@@ -292,7 +296,7 @@ public class ImageInput  extends JComponent {
   /**
    * Sets the specified image on this component. If the image cannot be read,
    * it updates the component with an error message. Never throws an exception.
-   * 
+   *
    * @param image
    */
   public void setImage(@Nullable ImageValue image) {
@@ -330,7 +334,7 @@ public class ImageInput  extends JComponent {
     this.messageLabel.setText(null);
     this.messageLabel.setIcon(null);
   }
-  
+
   @Nullable
   public ImageValue getImage() {
     return image;
@@ -397,14 +401,23 @@ public class ImageInput  extends JComponent {
       setMessage(getImageDescription(value), false);
     }
   }
-  
+
+  public boolean isOptimizedDrawingEnabled() {
+    return false;
+  }
+
   private class ImageLoadingTask extends SwingWorker<ImageValue, Void> {
 
     private final ImageValue value;
 
     public ImageLoadingTask(ImageValue value) {
       this.value = value;
-      getGlassPane().setVisible(true);
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          getGlassPane().setVisible(true);
+        }
+      });
     }
 
 

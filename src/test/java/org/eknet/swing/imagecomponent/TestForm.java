@@ -33,13 +33,17 @@ import org.alainn.swingbox.test.TestPanel;
  */
 public class TestForm extends JPanel {
   private JPanel root;
-  private ImageInput singleImageInput;
   private JTextField textField1;
+  private JPanel imageInputPanel;
+  
+  private ImageInput imageInput;
 
   public TestForm() {
     super(new BorderLayout());
-    singleImageInput.setPreviewSize(80, 80);
-    singleImageInput.setProposals(IconViewerTest.getIconURLs());
+    imageInput = new ImageInput();
+    imageInput.setPreviewSize(80, 80);
+    imageInput.setProposals(IconViewerTest.getIconURLs());
+    imageInputPanel.add(imageInput, BorderLayout.CENTER);
     root.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
     add(root, BorderLayout.CENTER);
 
@@ -49,7 +53,7 @@ public class TestForm extends JPanel {
 
   public static void main(String[] args) {
     final TestForm form = new TestForm();
-    form.singleImageInput.addPropertyChangeListener(new PropertyChangeListener() {
+    form.imageInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("image")) {
