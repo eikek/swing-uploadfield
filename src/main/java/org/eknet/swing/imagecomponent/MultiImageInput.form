@@ -18,10 +18,6 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="7ac7c" class="org.eknet.swing.imagecomponent.IconsList" binding="imageView">
-            <constraints border-constraint="Center"/>
-            <properties/>
-          </component>
           <grid id="480a0" layout-manager="GridBagLayout">
             <constraints border-constraint="West"/>
             <properties/>
@@ -56,6 +52,17 @@
               </component>
             </children>
           </grid>
+          <scrollpane id="10b6a" binding="previewScroller">
+            <constraints border-constraint="Center"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="7ac7c" class="org.eknet.swing.imagecomponent.IconsList" binding="imageView">
+                <constraints/>
+                <properties/>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
     </children>

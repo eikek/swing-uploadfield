@@ -60,6 +60,7 @@ public class IconsList extends JList {
 
         setHorizontalAlignment(SwingConstants.CENTER);
         setVerticalAlignment(SwingConstants.CENTER);
+        setPreferredSize(getPreviewSize());
 
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         setText(null);
@@ -110,7 +111,6 @@ public class IconsList extends JList {
     np.height += 5;
     setFixedCellHeight(np.height);
     setFixedCellWidth(np.width);
-    setPreferredSize(np);
   }
 
   public void addElement(Object urlOrIconOrImageValue) {

@@ -23,8 +23,8 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import org.alainn.swingbox.test.TestPanel;
 
@@ -32,15 +32,16 @@ import org.alainn.swingbox.test.TestPanel;
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 19:58
  */
-public class TestForm extends JPanel {
+public class DemoForm extends JPanel {
+
   private JPanel root;
-  private JTextField textField1;
   private JPanel imageInputPanel;
   private MultiImageInput multiImageInput;
+  private JEditorPane editorPane1;
 
   private ImageInput imageInput;
 
-  public TestForm() {
+  public DemoForm() {
     super(new BorderLayout());
     imageInput = new ImageInput();
     imageInput.setPreviewSize(80, 80);
@@ -57,7 +58,7 @@ public class TestForm extends JPanel {
 
 
   public static void main(String[] args) {
-    final TestForm form = new TestForm();
+    final DemoForm form = new DemoForm();
     form.imageInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {

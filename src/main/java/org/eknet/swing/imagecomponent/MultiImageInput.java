@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -49,6 +51,7 @@ public class MultiImageInput extends JPanel {
   private JButton addImageButton;
   private JButton removeImageButton;
   private JPanel imageInputContainer;
+  private JScrollPane previewScroller;
 
   private final static Icon addIcon = new ImageIcon(MultiImageInput.class.getResource("add.png"));
   private final static Icon deleteIcon = new ImageIcon(MultiImageInput.class.getResource("delete.png"));
@@ -62,6 +65,7 @@ public class MultiImageInput extends JPanel {
     imageInputContainer.add(imageInput, BorderLayout.CENTER);
 
     imageView.setPreviewSize(imageInput.getPreviewSize());
+    previewScroller.setBorder(BorderFactory.createEtchedBorder());
     imageView.addListSelectionListener(new ListSelectionListener() {
       @Override
       public void valueChanged(ListSelectionEvent e) {
@@ -81,6 +85,7 @@ public class MultiImageInput extends JPanel {
         List<ImageValue> newValue = new ArrayList<ImageValue>(getImageList());
         newValue.add(imageInput.getImage());
         setImageList(newValue);
+        imageInput.setImage(null);
       }
     });
 
@@ -96,6 +101,7 @@ public class MultiImageInput extends JPanel {
           List<ImageValue> newValue = new ArrayList<ImageValue>(getImageList());
           newValue.remove(selected);
           setImageList(newValue);
+          imageInput.setImage(null);
         }
       }
     });
