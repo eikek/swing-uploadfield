@@ -88,6 +88,8 @@ public class UploadField extends JPanel {
 
   private static final Logger log = LoggerFactory.getLogger(UploadField.class);
 
+  public static final String VALUE_PROPERTY_NAME = "uploadValue";
+
   private JPanel root;
   private JButton previewButton;
   private JTextField resourceField;
@@ -118,7 +120,7 @@ public class UploadField extends JPanel {
   private final MouseAdapter emptyMouseListener = new MouseAdapter() {};
   private final KeyAdapter emptyKeyListener = new KeyAdapter() {};
 
-  private UploadValue image;
+  private UploadValue uploadValue;
 
   private final DocumentListener nameFieldOnTypeUpdater = new DocumentListener() {
     @Override
@@ -167,7 +169,7 @@ public class UploadField extends JPanel {
           if (url != null) {
             UploadValue value = createNewOrCopy();
             value.setResource(url);
-            setImage(value);
+            setUploadValue(value);
           }
           if (dialog != null) {
             dialog.setVisible(false);
@@ -226,7 +228,7 @@ public class UploadField extends JPanel {
     resetButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        setImage(null);
+        setUploadValue(null);
       }
     });
 
@@ -236,7 +238,7 @@ public class UploadField extends JPanel {
         if (e.getKeyChar() == KeyEvent.VK_ENTER) {
           String url = resourceField.getText();
           if (url == null || "".equals(url.trim())) {
-            setImage(null);
+            setUploadValue(null);
           } else {
             UploadValue value = createNewOrCopy();
             try {
@@ -244,7 +246,7 @@ public class UploadField extends JPanel {
                 url = new File(url).toURI().toURL().toString();
               }
               value.setResource(new URL(url));
-              setImage(value);
+              setUploadValue(value);
             } catch (MalformedURLException e1) {
               setMessage(getLoadingErrorMessage(value), true);
             }
@@ -356,25 +358,25 @@ public class UploadField extends JPanel {
    * Sets the specified image on this component. If the image cannot be read,
    * it updates the component with an error message. Never throws an exception.
    *
-   * @param image
+   * @param uploadValue
    */
-  public void setImage(@Nullable UploadValue image) {
-    UploadValue old = getImage();
+  public void setUploadValue(@Nullable UploadValue uploadValue) {
+    UploadValue old = getUploadValue();
 
     //if new image url is given, component must be updated by LoadingImageTask
     boolean loading = false;
-    if (image != null && image.getResource() != null) {
-      if (old == null || (!image.getResource().equals(old.getResource()))) {
-        new ImageLoadingTask(image).execute();
+    if (uploadValue != null && uploadValue.getResource() != null) {
+      if (old == null || (!uploadValue.getResource().equals(old.getResource()))) {
+        new ImageLoadingTask(uploadValue).execute();
         loading = true;
       }
     }
     if (!loading) {
-      if (!Utils.nullSafeEquals(image, old)) {
-        this.image = image;
-        firePropertyChange("image", old, image);
+      if (!Utils.nullSafeEquals(uploadValue, old)) {
+        this.uploadValue = uploadValue;
+        firePropertyChange(VALUE_PROPERTY_NAME, old, uploadValue);
       }
-      updateComponent(this.image);
+      updateComponent(this.uploadValue);
     }
   }
 
@@ -395,15 +397,29 @@ public class UploadField extends JPanel {
   }
 
   @Nullable
-  public UploadValue getImage() {
-    return image;
+  public UploadValue getUploadValue() {
+    return uploadValue;
   }
 
+  /**
+   * Returns a action that is executed when the preview button
+   * is clicked. The default action presents a file-open dialog
+   * to the user.
+   * 
+   * @return
+   */
   protected Action newOpenFileAction() {
     return new FileOpenAction(this);
   }
 
-  protected String getImageDescription(@NotNull UploadValue value) {
+  /**
+   * Called when the ui is updated with a new value. This method returns
+   * a short description string about the file.
+   * 
+   * @param value
+   * @return
+   */
+  protected String getFileDescription(@NotNull UploadValue value) {
     StringBuilder buf = new StringBuilder();
     if (value.getImage() != null && !value.isMissingImage()) {
       buf.append(value.getImage().getWidth())
@@ -420,6 +436,12 @@ public class UploadField extends JPanel {
     return buf.toString();
   }
 
+  /**
+   * Called when no preview image is available. It returns a short
+   * error message indicating this to the user.
+   * @param value
+   * @return
+   */
   protected String getLoadingErrorMessage(UploadValue value) {
     String name = "";
     if (value == null || value.getResource() == null) {
@@ -430,16 +452,22 @@ public class UploadField extends JPanel {
     return "Unable to load preview for: " + name;
   }
 
+  /**
+   * Used to set the tooltip on the preview image button. This button
+   * triggers a file-open dialog to select a file from the local disk.
+   * 
+   * @return
+   */
   protected String getOpenButtonTooltip() {
     return "Click to select a image from disk";
   }
 
 
   private UploadValue createNewOrCopy() {
-    if (this.image == null) {
+    if (this.uploadValue == null) {
       return new UploadValue();
     }
-    return new UploadValue(this.image);
+    return new UploadValue(this.uploadValue);
   }
 
   /**
@@ -449,13 +477,13 @@ public class UploadField extends JPanel {
     String text = nameField.getText();
     String url = resourceField.getText();
     if (url == null && (text == null || "".equals(text.trim()))) {
-      setImage(null);
+      setUploadValue(null);
     } else {
       UploadValue value = createNewOrCopy();
       value.setName(text);
-      UploadValue old = getImage();
-      UploadField.this.image = value;
-      UploadField.this.firePropertyChange("image", old, value);
+      UploadValue old = getUploadValue();
+      UploadField.this.uploadValue = value;
+      UploadField.this.firePropertyChange(VALUE_PROPERTY_NAME, old, value);
     }
   }
 
@@ -475,7 +503,7 @@ public class UploadField extends JPanel {
         previewButton.setIcon(value.getIcon());
         previewButton.setText(null);
       }
-      setMessage(getImageDescription(value), false);
+      setMessage(getFileDescription(value), false);
     }
     documentListenerMuted = false;
   }
@@ -534,14 +562,14 @@ public class UploadField extends JPanel {
     @Override
     protected void done() {
       try {
-        UploadValue old = getImage();
+        UploadValue old = getUploadValue();
         UploadValue newvValue = get();
-        UploadField.this.image = newvValue;
+        UploadField.this.uploadValue = newvValue;
         updateComponent(newvValue);
         if (newvValue.getImage() == null) {
           setMessage(getLoadingErrorMessage(value), true);
         }
-        UploadField.this.firePropertyChange("image", old, newvValue);
+        UploadField.this.firePropertyChange(VALUE_PROPERTY_NAME, old, newvValue);
       } catch (InterruptedException e) {
         setMessage(getLoadingErrorMessage(value), true);
         log.error("Error loading image!", e);

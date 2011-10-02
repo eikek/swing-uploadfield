@@ -66,7 +66,7 @@ public class DemoForm extends JPanel {
     form.fileInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("image")) {
+        if (evt.getPropertyName().equals(UploadField.VALUE_PROPERTY_NAME)) {
           System.out.println("New Image: " + evt.getNewValue());
         }
       }
@@ -74,7 +74,7 @@ public class DemoForm extends JPanel {
     form.multiUploadField.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("imageList")) {
+        if (evt.getPropertyName().equals(MultiUploadField.VALUE_PROPERTY_NAME)) {
           List list = (List) evt.getNewValue();
           System.out.println("new images [ " + list.size() + " ]:" + list);
         }

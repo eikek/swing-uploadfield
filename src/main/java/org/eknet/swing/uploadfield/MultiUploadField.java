@@ -47,6 +47,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MultiUploadField extends JPanel {
 
+  public static final String VALUE_PROPERTY_NAME = "uploadValueList";
+
   private JPanel root;
   private IconsList previewList;
   private UploadField fileInput;
@@ -58,41 +60,41 @@ public class MultiUploadField extends JPanel {
   private final static Icon addIcon = new ImageIcon(MultiUploadField.class.getResource("add.png"));
   private final static Icon deleteIcon = new ImageIcon(MultiUploadField.class.getResource("delete.png"));
 
-  private List<UploadValue> imageList = new ArrayList<UploadValue>();
+  private List<UploadValue> uploadValueList = new ArrayList<UploadValue>();
 
   private final ActionListener addAction = new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
-      List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
-      newValue.add(fileInput.getImage());
-      setImageList(newValue);
+      List<UploadValue> newValue = new ArrayList<UploadValue>(getUploadValueList());
+      if (!newValue.contains(fileInput.getUploadValue())) {
+        newValue.add(fileInput.getUploadValue());
+        setUploadValueList(newValue);
+      }
     }
   };
-
   private final ActionListener removeAction = new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
       UploadValue selected = (UploadValue) previewList.getSelectedValue();
       if (selected != null) {
-        List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
+        List<UploadValue> newValue = new ArrayList<UploadValue>(getUploadValueList());
         newValue.remove(selected);
-        setImageList(newValue);
-        fileInput.setImage(null);
+        setUploadValueList(newValue);
+        fileInput.setUploadValue(null);
       }
     }
   };
-
   private final ActionListener replaceAction = new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
       UploadValue selected = (UploadValue) previewList.getSelectedValue();
-      if (selected != null && fileInput.getImage() != null) {
-        List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
-        int index = newValue.indexOf(selected);
-        newValue.remove(selected);
-        newValue.add(index, fileInput.getImage());
-        setImageList(newValue);
-      }
+      UploadValue edited = fileInput.getUploadValue();
+      List<UploadValue> old = getUploadValueList();
+      List<UploadValue> list = new ArrayList<UploadValue>(getUploadValueList());
+      int index = list.indexOf(selected);
+      list.remove(selected);
+      list.add(index, edited);
+      MultiUploadField.this.firePropertyChange(VALUE_PROPERTY_NAME, old, list);
     }
   };
 
@@ -123,7 +125,7 @@ public class MultiUploadField extends JPanel {
           removeFileButton.setEnabled(previewList.getSelectedValue() != null);
           UploadValue value = (UploadValue) previewList.getSelectedValue();
           if (value != null) {
-            fileInput.setImage(value);
+            fileInput.setUploadValue(value);
           }
         }
       }
@@ -144,8 +146,7 @@ public class MultiUploadField extends JPanel {
     fileInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("image")) {
-//          addFileButton.setEnabled(fileInput.getImage() != null && previewList.getSelectedValue() != null);
+        if (evt.getPropertyName().equals(UploadField.VALUE_PROPERTY_NAME)) {
           if (evt.getNewValue() != null) {
             UploadValue ov = (UploadValue) evt.getOldValue();
             UploadValue nv = (UploadValue) evt.getNewValue();
@@ -216,15 +217,11 @@ public class MultiUploadField extends JPanel {
     return fileInput;
   }
 
-  public void setImageList(final List<UploadValue> images) {
-    List<UploadValue> old = new ArrayList<UploadValue>(getImageList());
-    for (UploadValue value : images) {
-      if (!old.contains(value)) {
-        this.imageList.add(value);
-        previewList.addElement(value);
-      }
-    }
-    Iterator<UploadValue> iter = this.imageList.iterator();
+  public void setUploadValueList(final List<UploadValue> images) {
+    List<UploadValue> old = new ArrayList<UploadValue>(getUploadValueList());
+
+    //remove all not in "images"
+    Iterator<UploadValue> iter = this.uploadValueList.iterator();
     while (iter.hasNext()) {
       UploadValue img = iter.next();
       if (!images.contains(img)) {
@@ -232,13 +229,31 @@ public class MultiUploadField extends JPanel {
         previewList.removeElement(img);
       }
     }
+
+    //add all from images not already contained
+    for (UploadValue value : images) {
+      if (!old.contains(value)) {
+        this.uploadValueList.add(value);
+        previewList.addElement(value);
+      }
+    }
+
+    //fire change event
     if (!old.equals(images)) {
-      firePropertyChange("imageList", old, images);
+      firePropertyChange(VALUE_PROPERTY_NAME, old, images);
     }
   }
 
-  public List<UploadValue> getImageList() {
-    return imageList;
+  public List<UploadValue> getUploadValueList() {
+    return uploadValueList;
+  }
+
+  private List<UploadValue> cloneList() {
+    List<UploadValue> clone = new ArrayList<UploadValue>(this.uploadValueList.size());
+    for (UploadValue val : this.uploadValueList) {
+      clone.add(new UploadValue(val));
+    }
+    return clone;
   }
 }
 

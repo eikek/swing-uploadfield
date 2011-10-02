@@ -60,7 +60,7 @@ class FileOpenAction extends AbstractAction {
 
   private void pushFileToComponent(File f) {
     prefs.put("FileOpenAction.lastLocation", f.getAbsolutePath());
-    UploadValue old = component.getImage();
+    UploadValue old = component.getUploadValue();
     UploadValue current = null;
     try {
       current = old != null? old.clone() : new UploadValue();
@@ -69,7 +69,7 @@ class FileOpenAction extends AbstractAction {
     }
     try {
       current.setResource(f.toURI().toURL());
-      component.setImage(current);
+      component.setUploadValue(current);
     } catch (MalformedURLException e1) {
       throw new RuntimeException(e1);
     }
