@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,6 +39,13 @@ import org.slf4j.LoggerFactory;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Displays a list of images, which can be
+ * <ul>
+ *   <li>{@link Icon}s,</li>
+ *   <li>{@link URL}s to images or</li>
+ *   <li>{@link UploadValue}s</li>
+ * </ul>
+ * 
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 20:44
  */
@@ -74,10 +81,10 @@ public class IconsList extends JList {
           }
         } else if (value instanceof Icon) {
           setIcon((Icon) value);
-        } else if (value instanceof ImageValue) {
-          ImageValue iv = (ImageValue) value;
+        } else if (value instanceof UploadValue) {
+          UploadValue iv = (UploadValue) value;
           setIcon(iv.getIcon());
-          setToolTipText(iv.getImageName());
+          setToolTipText(iv.getName());
         } else {
           setIcon(null);
         }

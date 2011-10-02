@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -35,10 +35,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -78,14 +79,13 @@ import org.jetbrains.annotations.Nullable;
  * component that allows the user to choose a image.</li>
  * <li>a button to reset the form</li>
  * </ul>
- * It supports scaling the image to a specified height/width.
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 15:24
  */
-public class ImageInput extends JPanel {
+public class UploadField extends JPanel {
 
-  private static final Logger log = LoggerFactory.getLogger(ImageInput.class);
+  private static final Logger log = LoggerFactory.getLogger(UploadField.class);
 
   private JPanel root;
   private JButton previewButton;
@@ -96,12 +96,13 @@ public class ImageInput extends JPanel {
   private JButton resetButton;
   private JLabel messageLabel;
 
-  private static final ImageIcon folderIcon = new ImageIcon(ImageInput.class.getResource("folder.png"));
-  private static final ImageIcon resetIcon = new ImageIcon(ImageInput.class.getResource("arrow_undo.png"));
-  private static final ImageIcon imagesIcon = new ImageIcon(ImageInput.class.getResource("images.png"));
-  private static final ImageIcon successIcon = new ImageIcon(ImageInput.class.getResource("tick.png"));
-  private static final ImageIcon errorIcon = new ImageIcon(ImageInput.class.getResource("error.png"));
+  private static final ImageIcon folderIcon = new ImageIcon(UploadField.class.getResource("folder.png"));
+  private static final ImageIcon resetIcon = new ImageIcon(UploadField.class.getResource("arrow_undo.png"));
+  private static final ImageIcon imagesIcon = new ImageIcon(UploadField.class.getResource("images.png"));
+  private static final ImageIcon successIcon = new ImageIcon(UploadField.class.getResource("tick.png"));
+  private static final ImageIcon errorIcon = new ImageIcon(UploadField.class.getResource("error.png"));
 
+  private final List<PreviewHandler> previewHandlers = new CopyOnWriteArrayList<PreviewHandler>();
 
   private Set<URL> proposals;
   private Dimension previewSize = new Dimension(50, 50);
@@ -116,9 +117,9 @@ public class ImageInput extends JPanel {
   private final MouseAdapter emptyMouseListener = new MouseAdapter() {};
   private final KeyAdapter emptyKeyListener = new KeyAdapter() {};
 
-  private ImageValue image;
+  private UploadValue image;
 
-  public ImageInput() {
+  public UploadField() {
     setLayout(new OverlayLayout(this));
     this.normalMessageColor = messageLabel.getForeground();
 
@@ -130,8 +131,8 @@ public class ImageInput extends JPanel {
         if (!e.getValueIsAdjusting()) {
           URL url = (URL) iconViewer.getSelectedValue();
           if (url != null) {
-            ImageValue value = createNewOrCopy();
-            value.setImageResource(url);
+            UploadValue value = createNewOrCopy();
+            value.setResource(url);
             setImage(value);
           }
           if (dialog != null) {
@@ -203,12 +204,12 @@ public class ImageInput extends JPanel {
           if (url == null || "".equals(url.trim())) {
             setImage(null);
           } else {
-            ImageValue value = createNewOrCopy();
+            UploadValue value = createNewOrCopy();
             try {
               if (!url.contains(":/")) {
                 url = new File(url).toURI().toURL().toString();
               }
-              value.setImageResource(new URL(url));
+              value.setResource(new URL(url));
               setImage(value);
             } catch (MalformedURLException e1) {
               setMessage(getLoadingErrorMessage(value), true);
@@ -242,11 +243,11 @@ public class ImageInput extends JPanel {
         if (url == null && (text == null || "".equals(text.trim()))) {
           setImage(null);
         } else {
-          ImageValue value = createNewOrCopy();
-          value.setImageName(text);
-          ImageValue old = getImage();
-          ImageInput.this.image = value;
-          ImageInput.this.firePropertyChange("image", old, value);
+          UploadValue value = createNewOrCopy();
+          value.setName(text);
+          UploadValue old = getImage();
+          UploadField.this.image = value;
+          UploadField.this.firePropertyChange("image", old, value);
         }
       }
     });
@@ -254,7 +255,18 @@ public class ImageInput extends JPanel {
     setGlassPane(new SimpleGlassPane());
   }
 
+  public static UploadField forImageFiles() {
+    UploadField fi = new UploadField();
+    fi.addPreviewHandler(new ImagePreviewHandler());
+    return fi;
+  }
 
+  public static UploadField forAllFiles() {
+    UploadField fi = forImageFiles();
+    fi.addPreviewHandler(Utils.allFileHandler());
+    return fi;
+  }
+  
   public void setPreviewSize(int width, int height) {
     this.setPreviewSize(new Dimension(width, height));
   }
@@ -278,6 +290,18 @@ public class ImageInput extends JPanel {
   @NotNull
   public Dimension getPreviewSize() {
     return this.previewSize;
+  }
+
+  public void addPreviewHandler(PreviewHandler handler) {
+    if (handler != null) {
+      previewHandlers.add(handler);
+    }
+  }
+
+  public void removePreviewHandler(PreviewHandler handler) {
+    if (handler != null) {
+      previewHandlers.remove(handler);
+    }
   }
 
   public JComponent getGlassPane() {
@@ -323,13 +347,13 @@ public class ImageInput extends JPanel {
    *
    * @param image
    */
-  public void setImage(@Nullable ImageValue image) {
-    ImageValue old = getImage();
+  public void setImage(@Nullable UploadValue image) {
+    UploadValue old = getImage();
 
     //if new image url is given, component must be updated by LoadingImageTask
     boolean loading = false;
-    if (image != null && image.getImageResource() != null) {
-      if (old == null || (!image.getImageResource().equals(old.getImageResource()))) {
+    if (image != null && image.getResource() != null) {
+      if (old == null || (!image.getResource().equals(old.getResource()))) {
         new ImageLoadingTask(image).execute();
         loading = true;
       }
@@ -360,39 +384,39 @@ public class ImageInput extends JPanel {
   }
 
   @Nullable
-  public ImageValue getImage() {
+  public UploadValue getImage() {
     return image;
   }
 
   protected Action newOpenImageAction() {
-    return new FileOpenAction(this);
+    return new FileOpenAction(this, previewHandlers);
   }
 
-  protected String getImageDescription(@NotNull ImageValue value) {
+  protected String getImageDescription(@NotNull UploadValue value) {
     StringBuilder buf = new StringBuilder();
-    if (value.getImage() != null) {
+    if (value.getImage() != null && !value.isMissingImage()) {
       buf.append(value.getImage().getWidth())
               .append("x")
               .append(value.getImage().getHeight())
               .append("px");
     }
-    if (value.getImageFile() != null) {
-      if (value.getImage() != null) {
+    if (value.getFile() != null) {
+      if (value.getImage() != null && !value.isMissingImage()) {
         buf.append("; ");
       }
-      buf.append(Utils.toSizeString(value.getImageFile().length()));
+      buf.append(Utils.toSizeString(value.getFile().length()));
     }
     return buf.toString();
   }
 
-  protected String getLoadingErrorMessage(ImageValue value) {
+  protected String getLoadingErrorMessage(UploadValue value) {
     String name = "";
-    if (value == null || value.getImageResource() == null) {
+    if (value == null || value.getResource() == null) {
       name = "<null>";
     } else {
-      name = Utils.lastUrlPart(value.getImageResource());
+      name = Utils.lastUrlPart(value.getResource());
     }
-    return "Unable to load image: " + name;
+    return "Unable to load preview for: " + name;
   }
 
   protected String getOpenButtonTooltip() {
@@ -400,25 +424,25 @@ public class ImageInput extends JPanel {
   }
 
 
-  private ImageValue createNewOrCopy() {
+  private UploadValue createNewOrCopy() {
     if (this.image == null) {
-      return new ImageValue();
+      return new UploadValue();
     }
-    return new ImageValue(this.image);
+    return new UploadValue(this.image);
   }
 
-  private void updateComponent(ImageValue value) {
+  private void updateComponent(UploadValue value) {
     documentListenerMuted = true;
-    if (ImageValue.isNullOrEmpty(value)) {
+    if (UploadValue.isNullOrEmpty(value)) {
       resourceField.setText(null);
       nameField.setText(null);
       previewButton.setIcon(folderIcon);
       previewButton.setText("...");
       clearMessage();
     } else {
-      URL url = value.getImageResource();
+      URL url = value.getResource();
       resourceField.setText(url != null ? url.toString() : null);
-      nameField.setText(value.getImageName());
+      nameField.setText(value.getName());
       if (value.getIcon() != null) {
         previewButton.setIcon(value.getIcon());
         previewButton.setText(null);
@@ -432,11 +456,11 @@ public class ImageInput extends JPanel {
     return false;
   }
 
-  private class ImageLoadingTask extends SwingWorker<ImageValue, Void> {
+  private class ImageLoadingTask extends SwingWorker<UploadValue, Void> {
 
-    private final ImageValue value;
+    private final UploadValue value;
 
-    public ImageLoadingTask(ImageValue value) {
+    public ImageLoadingTask(UploadValue value) {
       this.value = value;
       SwingUtilities.invokeLater(new Runnable() {
         @Override
@@ -450,34 +474,46 @@ public class ImageInput extends JPanel {
 
 
     @Override
-    protected ImageValue doInBackground() throws Exception {
-      if (ImageValue.isNullOrEmpty(value)) {
+    protected UploadValue doInBackground() throws Exception {
+      if (UploadValue.isNullOrEmpty(value)) {
         return null;
       }
-      BufferedImage image = value.getOrReadImage();
+      BufferedImage image = null;
+      for (PreviewHandler handler : previewHandlers) {
+        image = handler.createImage(value.getResource());
+        if (image != null) {
+          break;
+        }
+      }
       if (image == null) {
-        throw new IllegalArgumentException("Unable to set image from: " + value.getImageResource());
+        image = Utils.getMissingImage();
       }
-      if (!value.getImageResource().getProtocol().equals("file")) {
-        File tempFile = File.createTempFile("imageComponent", ".png");
+      value.setImage(image);
+      if (!value.getResource().getProtocol().equals("file")) {
+        File tempFile = File.createTempFile("fileInput", ".ext");
         tempFile.deleteOnExit();
-        ImageIO.write(image, "PNG", tempFile);
-        value.setImageFile(tempFile);
+        Utils.copy(value.getResource(), tempFile);
+        value.setFile(tempFile);
       } else {
-        value.setImageFile(new File(value.getImageResource().getPath()));
+        value.setFile(new File(value.getResource().getPath()));
       }
-      value.setIcon(new ImageIcon(value.getScaledImage(previewSize)));
+      if (image != null) {
+        value.setIcon(new ImageIcon(value.getScaledImage(previewSize)));
+      }
       return value;
     }
 
     @Override
     protected void done() {
       try {
-        ImageValue old = getImage();
-        ImageValue newvValue = get();
-        ImageInput.this.image = newvValue;
+        UploadValue old = getImage();
+        UploadValue newvValue = get();
+        UploadField.this.image = newvValue;
         updateComponent(newvValue);
-        ImageInput.this.firePropertyChange("image", old, newvValue);
+        if (newvValue.getImage() == null) {
+          setMessage(getLoadingErrorMessage(value), true);
+        }
+        UploadField.this.firePropertyChange("image", old, newvValue);
       } catch (InterruptedException e) {
         setMessage(getLoadingErrorMessage(value), true);
         log.error("Error loading image!", e);

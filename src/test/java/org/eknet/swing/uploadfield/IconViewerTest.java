@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.Dimension;
 import java.net.URL;
@@ -41,11 +41,11 @@ public class IconViewerTest {
 
   public static List<URL> getIconURLs() {
     List<URL> icons = new ArrayList<URL>();
-    icons.add(ImageInput.class.getResource("arrow_undo.png"));
-    icons.add(ImageInput.class.getResource("error.png"));
-    icons.add(ImageInput.class.getResource("folder.png"));
-    icons.add(ImageInput.class.getResource("images.png"));
-    icons.add(ImageInput.class.getResource("tick.png"));
+    icons.add(UploadField.class.getResource("arrow_undo.png"));
+    icons.add(UploadField.class.getResource("error.png"));
+    icons.add(UploadField.class.getResource("folder.png"));
+    icons.add(UploadField.class.getResource("images.png"));
+    icons.add(UploadField.class.getResource("tick.png"));
     return icons;
   }
 }

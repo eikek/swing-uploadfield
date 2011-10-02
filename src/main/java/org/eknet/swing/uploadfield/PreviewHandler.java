@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
-import org.alainn.swingbox.test.TestPanel;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.swing.filechooser.FileFilter;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 01.10.11 15:25
+ * @since 02.10.11 02:52
  */
-public class ImageInputTest {
+public interface PreviewHandler {
 
-  public static void main(String[] args) {
-    ImageInput img = new ImageInput();
-    img.setPreviewSize(90, 90);
-    img.setProposals(IconViewerTest.getIconURLs());
-    TestPanel.start(img, "Image Input");
-  }
+  @Nullable
+  BufferedImage createImage(URL url) throws IOException;
+
+  @Nullable
+  FileFilter getFileFilter();
+  
 }

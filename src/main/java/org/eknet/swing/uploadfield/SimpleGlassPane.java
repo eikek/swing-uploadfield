@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -27,6 +27,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
+ * This is the default glass pane used with the {@link UploadField} component.
+ * 
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 18:30
  */

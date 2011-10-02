@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;

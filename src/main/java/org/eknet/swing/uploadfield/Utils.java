@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics2D;
 import java.awt.Window;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+
+import javax.swing.filechooser.FileFilter;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -71,5 +81,55 @@ final class Utils {
     }
     mb = mb.setScale(2, BigDecimal.ROUND_HALF_EVEN);
     return mb.toString() + " " + unit;
+  }
+
+  private static BufferedImage missingImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+  static {
+    Graphics2D g = missingImage.createGraphics();
+    g.setColor(Color.black);
+    int gap = 20;
+    g.drawLine(gap, gap, missingImage.getWidth() - gap, missingImage.getHeight() - gap);
+    g.drawLine(missingImage.getWidth() - gap, gap, gap, missingImage.getHeight() - gap);
+  }
+  public static BufferedImage getMissingImage() {
+    return missingImage;
+  }
+
+  public static void copy(URL in, File out) throws IOException {
+    InputStream is = in.openStream();
+    OutputStream os = new FileOutputStream(out);
+    byte[] buffer = new byte[4096];
+    int len;
+    while ((len = is.read(buffer)) != -1) {
+      os.write(buffer, 0, len);
+    }
+    os.close();
+    is.close();
+  }
+
+  private final static FileFilter allFiles = new FileFilter() {
+    @Override
+    public boolean accept(File f) {
+      return true;
+    }
+
+    @Override
+    public String getDescription() {
+      return "*";
+    }
+  };
+
+  public static PreviewHandler allFileHandler() {
+    return new PreviewHandler() {
+      @Override
+      public BufferedImage createImage(URL url) throws IOException {
+        return null;
+      }
+
+      @Override
+      public FileFilter getFileFilter() {
+        return allFiles;
+      }
+    };
   }
 }

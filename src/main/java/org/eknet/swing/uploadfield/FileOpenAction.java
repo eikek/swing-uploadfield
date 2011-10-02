@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -34,29 +35,32 @@ class FileOpenAction extends AbstractAction {
 
   private final Preferences prefs = Preferences.userNodeForPackage(FileOpenAction.class);
 
-  private final ImageInput component;
+  private final UploadField component;
 
-  public FileOpenAction(ImageInput component) {
+  private final List<PreviewHandler> previewHandlers;
+
+  public FileOpenAction(UploadField component, List<PreviewHandler> handlers) {
     this.component = component;
+    this.previewHandlers = handlers;
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     String path = prefs.get("FileOpenAction.lastLocation", null);
     JFileChooser fc = new JFileChooser(path);
-    fc.setFileFilter(new FileNameExtensionFilter("Images", "png", "jpg", "bmp", "tif"));
+    fc.setFileFilter(createFilter());
     if (fc.showOpenDialog(getSourceComponent(e)) == JFileChooser.APPROVE_OPTION) {
       File f = fc.getSelectedFile();
       prefs.put("FileOpenAction.lastLocation", f.getAbsolutePath());
-      ImageValue old = component.getImage();
-      ImageValue current = null;
+      UploadValue old = component.getImage();
+      UploadValue current = null;
       try {
-        current = old != null? old.clone() : new ImageValue();
+        current = old != null? old.clone() : new UploadValue();
       } catch (CloneNotSupportedException e1) {
         throw new Error("Unreachable code!", e1);
       }
       try {
-        current.setImageResource(f.toURI().toURL());
+        current.setResource(f.toURI().toURL());
         component.setImage(current);
       } catch (MalformedURLException e1) {
         throw new RuntimeException(e1);
@@ -64,6 +68,14 @@ class FileOpenAction extends AbstractAction {
     }
   }
 
+  private FileFilter createFilter() {
+    CompoundFileFilter filter = new CompoundFileFilter();
+    for (PreviewHandler handler : previewHandlers) {
+      filter.addFilter(handler.getFileFilter());
+    }
+    return filter;
+  }
+  
   private Component getSourceComponent(ActionEvent e) {
     Object o = e.getSource();
     if (o instanceof Component) {

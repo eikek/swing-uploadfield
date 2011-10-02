@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.swing.imagecomponent;
+package org.eknet.swing.uploadfield;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -36,20 +36,20 @@ public class DemoForm extends JPanel {
 
   private JPanel root;
   private JPanel imageInputPanel;
-  private MultiImageInput multiImageInput;
+  private MultiUploadField multiUploadField;
   private JEditorPane editorPane1;
 
-  private ImageInput imageInput;
+  private UploadField fileInput;
 
   public DemoForm() {
     super(new BorderLayout());
-    imageInput = new ImageInput();
-    imageInput.setPreviewSize(80, 80);
-    imageInput.setProposals(IconViewerTest.getIconURLs());
-    imageInputPanel.add(imageInput, BorderLayout.CENTER);
+    fileInput = UploadField.forImageFiles();
+    fileInput.setPreviewSize(80, 80);
+    fileInput.setProposals(IconViewerTest.getIconURLs());
+    imageInputPanel.add(fileInput, BorderLayout.CENTER);
 
-    multiImageInput.setProposals(IconViewerTest.getIconURLs());
-    multiImageInput.setPreviewSize(new Dimension(65, 65));
+    multiUploadField.setProposals(IconViewerTest.getIconURLs());
+    multiUploadField.setPreviewSize(new Dimension(65, 65));
     root.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
     add(root, BorderLayout.CENTER);
 
@@ -57,9 +57,13 @@ public class DemoForm extends JPanel {
   }
 
 
+  private void createUIComponents() {
+    multiUploadField = MultiUploadField.forAllFiles();
+  }
+
   public static void main(String[] args) {
     final DemoForm form = new DemoForm();
-    form.imageInput.addPropertyChangeListener(new PropertyChangeListener() {
+    form.fileInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("image")) {
@@ -67,7 +71,7 @@ public class DemoForm extends JPanel {
         }
       }
     });
-    form.multiImageInput.addPropertyChangeListener(new PropertyChangeListener() {
+    form.multiUploadField.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("imageList")) {

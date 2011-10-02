@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.eknet.swing.imagecomponent.MultiImageInput">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.eknet.swing.uploadfield.MultiUploadField">
   <grid id="27dc6" binding="root" layout-manager="BorderLayout" hgap="0" vgap="5">
     <constraints>
       <xy x="20" y="20" width="500" height="400"/>
@@ -7,7 +7,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="671a" binding="imageInputContainer" layout-manager="BorderLayout" hgap="0" vgap="0">
+      <grid id="671a" binding="fileInputContainer" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="North"/>
         <properties/>
         <border type="none"/>
@@ -23,7 +23,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="e33ed" class="javax.swing.JButton" binding="addImageButton">
+              <component id="e33ed" class="javax.swing.JButton" binding="addFileButton">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
@@ -32,7 +32,7 @@
                   <text value="Add"/>
                 </properties>
               </component>
-              <component id="16ce4" class="javax.swing.JButton" binding="removeImageButton">
+              <component id="16ce4" class="javax.swing.JButton" binding="removeFileButton">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
@@ -57,7 +57,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="7ac7c" class="org.eknet.swing.imagecomponent.IconsList" binding="imageView">
+              <component id="7ac7c" class="org.eknet.swing.uploadfield.IconsList" binding="previewList">
                 <constraints/>
                 <properties/>
               </component>
