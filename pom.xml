@@ -189,7 +189,7 @@
         <configuration>
           <instructions>
             <_include>-osgi.bnd</_include>
-            <Export-Package>org.eknet.swing.imagecomponent*</Export-Package>
+            <Export-Package>org.eknet.swing.uploadfield*</Export-Package>
           </instructions>
         </configuration>
       </plugin>
