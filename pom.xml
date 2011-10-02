@@ -229,7 +229,6 @@
       <plugin>
         <groupId>ch.raffael.maven</groupId>
         <artifactId>idea-forms-maven-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
         <executions>
           <execution>
             <goals>

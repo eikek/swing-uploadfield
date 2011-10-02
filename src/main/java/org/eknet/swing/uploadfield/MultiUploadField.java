@@ -217,21 +217,25 @@ public class MultiUploadField extends JPanel {
     return fileInput;
   }
 
-  public void setUploadValueList(final List<UploadValue> images) {
+  public void setUploadValueList(final List<UploadValue> uploadList) {
     List<UploadValue> old = new ArrayList<UploadValue>(getUploadValueList());
-
-    //remove all not in "images"
+    List<UploadValue> files = uploadList;
+    if (files == null) {
+      files = new ArrayList<UploadValue>();
+    }
+    
+    //remove all not in "files"
     Iterator<UploadValue> iter = this.uploadValueList.iterator();
     while (iter.hasNext()) {
       UploadValue img = iter.next();
-      if (!images.contains(img)) {
+      if (!files.contains(img)) {
         iter.remove();
         previewList.removeElement(img);
       }
     }
 
-    //add all from images not already contained
-    for (UploadValue value : images) {
+    //add all from files not already contained
+    for (UploadValue value : files) {
       if (!old.contains(value)) {
         this.uploadValueList.add(value);
         previewList.addElement(value);
@@ -239,8 +243,8 @@ public class MultiUploadField extends JPanel {
     }
 
     //fire change event
-    if (!old.equals(images)) {
-      firePropertyChange(VALUE_PROPERTY_NAME, old, images);
+    if (!old.equals(files)) {
+      firePropertyChange(VALUE_PROPERTY_NAME, old, files);
     }
   }
 
