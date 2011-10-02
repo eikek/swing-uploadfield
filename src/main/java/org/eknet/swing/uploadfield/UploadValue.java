@@ -22,7 +22,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import javax.swing.Icon;
 
@@ -89,8 +91,13 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
     URL old = getResource();
     this.resource = resource;
     changeSupport.firePropertyChange("imageResource", old, resource);
-    if (getName() == null && resource != null) {
-      setName(Utils.lastUrlPart(resource));
+    if (resource != null) {
+      try {
+        setName(URLDecoder.decode(Utils.lastUrlPart(resource), "UTF-8"));
+      } catch (UnsupportedEncodingException e) {
+        //oops
+        setName(Utils.lastUrlPart(resource));
+      }
     }
     setImage(null);
     setFile(null);

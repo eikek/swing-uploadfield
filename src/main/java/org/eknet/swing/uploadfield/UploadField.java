@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -495,7 +496,7 @@ public class UploadField extends JPanel {
         Utils.copy(value.getResource(), tempFile);
         value.setFile(tempFile);
       } else {
-        value.setFile(new File(value.getResource().getPath()));
+        value.setFile(new File(URLDecoder.decode(value.getResource().getPath(), "UTF-8")));
       }
       if (image != null) {
         value.setIcon(new ImageIcon(value.getScaledImage(previewSize)));
