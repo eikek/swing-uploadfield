@@ -20,7 +20,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -37,35 +36,51 @@ class FileOpenAction extends AbstractAction {
 
   private final UploadField component;
 
-  private final List<PreviewHandler> previewHandlers;
+  private final Iterable<PreviewHandler> previewHandlers;
 
-  public FileOpenAction(UploadField component, List<PreviewHandler> handlers) {
+  public FileOpenAction(UploadField component) {
     this.component = component;
-    this.previewHandlers = handlers;
+    this.previewHandlers = component.getPreviewHandlers();
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     String path = prefs.get("FileOpenAction.lastLocation", null);
-    JFileChooser fc = new JFileChooser(path);
-    fc.setFileFilter(createFilter());
+    JFileChooser fc = newFileChooser(path);
     if (fc.showOpenDialog(getSourceComponent(e)) == JFileChooser.APPROVE_OPTION) {
-      File f = fc.getSelectedFile();
-      prefs.put("FileOpenAction.lastLocation", f.getAbsolutePath());
-      UploadValue old = component.getImage();
-      UploadValue current = null;
-      try {
-        current = old != null? old.clone() : new UploadValue();
-      } catch (CloneNotSupportedException e1) {
-        throw new Error("Unreachable code!", e1);
-      }
-      try {
-        current.setResource(f.toURI().toURL());
-        component.setImage(current);
-      } catch (MalformedURLException e1) {
-        throw new RuntimeException(e1);
+      if (fc.isMultiSelectionEnabled()) {
+        for (File f : fc.getSelectedFiles()) {
+          pushFileToComponent(f);
+        }
+      } else {
+        pushFileToComponent(fc.getSelectedFile());
       }
     }
+  }
+
+  private void pushFileToComponent(File f) {
+    prefs.put("FileOpenAction.lastLocation", f.getAbsolutePath());
+    UploadValue old = component.getImage();
+    UploadValue current = null;
+    try {
+      current = old != null? old.clone() : new UploadValue();
+    } catch (CloneNotSupportedException e1) {
+      throw new Error("Unreachable code!", e1);
+    }
+    try {
+      current.setResource(f.toURI().toURL());
+      component.setImage(current);
+    } catch (MalformedURLException e1) {
+      throw new RuntimeException(e1);
+    }
+  }
+
+  protected JFileChooser newFileChooser(String path) {
+    JFileChooser fc = new JFileChooser(path);
+    fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fc.setFileFilter(createFilter());
+    fc.setMultiSelectionEnabled(false);
+    return fc;
   }
 
   private FileFilter createFilter() {

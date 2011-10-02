@@ -120,7 +120,40 @@ public class UploadField extends JPanel {
 
   private UploadValue image;
 
+  private final DocumentListener nameFieldOnTypeUpdater = new DocumentListener() {
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+      updateNameField();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+      updateNameField();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+      updateNameField();
+    }
+  };
+  private final KeyAdapter nameFieldEnterUpdater = new KeyAdapter() {
+    @Override
+    public void keyTyped(KeyEvent e) {
+      if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+        updateNameField();
+      }
+    }
+  };
+
+  public enum NameFieldUpdater {
+    ON_TYPE, ON_ENTER
+  }
+
   public UploadField() {
+    this(NameFieldUpdater.ON_TYPE);
+  }
+
+  public UploadField(NameFieldUpdater updateStrategy) {
     setLayout(new OverlayLayout(this));
     this.normalMessageColor = messageLabel.getForeground();
 
@@ -145,7 +178,7 @@ public class UploadField extends JPanel {
 
     previewButton.setIcon(folderIcon);
     previewButton.setText("...");
-    previewButton.addActionListener(newOpenImageAction());
+    previewButton.addActionListener(newOpenFileAction());
     previewButton.setBackground(Color.white);
     previewButton.setToolTipText(getOpenButtonTooltip());
 
@@ -219,39 +252,12 @@ public class UploadField extends JPanel {
         }
       }
     });
-    nameField.getDocument().addDocumentListener(new DocumentListener() {
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        update(e);
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-        update(e);
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) {
-        update(e);
-      }
-
-      private void update(DocumentEvent e) {
-        if (documentListenerMuted) {
-          return;
-        }
-        String text = nameField.getText();
-        String url = resourceField.getText();
-        if (url == null && (text == null || "".equals(text.trim()))) {
-          setImage(null);
-        } else {
-          UploadValue value = createNewOrCopy();
-          value.setName(text);
-          UploadValue old = getImage();
-          UploadField.this.image = value;
-          UploadField.this.firePropertyChange("image", old, value);
-        }
-      }
-    });
+    if (updateStrategy == NameFieldUpdater.ON_TYPE) {
+      nameField.getDocument().addDocumentListener(nameFieldOnTypeUpdater);
+    } else {
+      nameField.addKeyListener(nameFieldEnterUpdater);
+    }
+    
     add(root, -1);
     setGlassPane(new SimpleGlassPane());
   }
@@ -267,7 +273,7 @@ public class UploadField extends JPanel {
     fi.addPreviewHandler(Utils.allFileHandler());
     return fi;
   }
-  
+
   public void setPreviewSize(int width, int height) {
     this.setPreviewSize(new Dimension(width, height));
   }
@@ -303,6 +309,10 @@ public class UploadField extends JPanel {
     if (handler != null) {
       previewHandlers.remove(handler);
     }
+  }
+
+  public Iterable<PreviewHandler> getPreviewHandlers() {
+    return previewHandlers;
   }
 
   public JComponent getGlassPane() {
@@ -389,8 +399,8 @@ public class UploadField extends JPanel {
     return image;
   }
 
-  protected Action newOpenImageAction() {
-    return new FileOpenAction(this, previewHandlers);
+  protected Action newOpenFileAction() {
+    return new FileOpenAction(this);
   }
 
   protected String getImageDescription(@NotNull UploadValue value) {
@@ -430,6 +440,23 @@ public class UploadField extends JPanel {
       return new UploadValue();
     }
     return new UploadValue(this.image);
+  }
+
+  /**
+   * Must be called to reflect changes to the nameField only to the model.
+   */
+  private void updateNameField() {
+    String text = nameField.getText();
+    String url = resourceField.getText();
+    if (url == null && (text == null || "".equals(text.trim()))) {
+      setImage(null);
+    } else {
+      UploadValue value = createNewOrCopy();
+      value.setName(text);
+      UploadValue old = getImage();
+      UploadField.this.image = value;
+      UploadField.this.firePropertyChange("image", old, value);
+    }
   }
 
   private void updateComponent(UploadValue value) {

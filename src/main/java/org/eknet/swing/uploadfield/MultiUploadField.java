@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
@@ -57,11 +59,59 @@ public class MultiUploadField extends JPanel {
   private final static Icon deleteIcon = new ImageIcon(MultiUploadField.class.getResource("delete.png"));
 
   private List<UploadValue> imageList = new ArrayList<UploadValue>();
-  
+
+  private final ActionListener addAction = new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
+      newValue.add(fileInput.getImage());
+      setImageList(newValue);
+    }
+  };
+
+  private final ActionListener removeAction = new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      UploadValue selected = (UploadValue) previewList.getSelectedValue();
+      if (selected != null) {
+        List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
+        newValue.remove(selected);
+        setImageList(newValue);
+        fileInput.setImage(null);
+      }
+    }
+  };
+
+  private final ActionListener replaceAction = new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      UploadValue selected = (UploadValue) previewList.getSelectedValue();
+      if (selected != null && fileInput.getImage() != null) {
+        List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
+        int index = newValue.indexOf(selected);
+        newValue.remove(selected);
+        newValue.add(index, fileInput.getImage());
+        setImageList(newValue);
+      }
+    }
+  };
+
   public MultiUploadField() {
     super(new BorderLayout());
 
-    fileInput = new UploadField();
+    fileInput = new UploadField(UploadField.NameFieldUpdater.ON_ENTER) {
+      @Override
+      protected Action newOpenFileAction() {
+        return new FileOpenAction(this) {
+          @Override
+          protected JFileChooser newFileChooser(String path) {
+            JFileChooser fc = super.newFileChooser(path);
+            fc.setMultiSelectionEnabled(true);
+            return fc;
+          }
+        };
+      }
+    };
     fileInputContainer.add(fileInput, BorderLayout.CENTER);
 
     previewList.setPreviewSize(fileInput.getPreviewSize());
@@ -83,38 +133,28 @@ public class MultiUploadField extends JPanel {
     addFileButton.setIcon(addIcon);
     addFileButton.setPreferredSize(new Dimension(25, 25));
     addFileButton.setEnabled(false);
-    addFileButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
-        newValue.add(fileInput.getImage());
-        setImageList(newValue);
-        fileInput.setImage(null);
-      }
-    });
-
+    addFileButton.setVisible(false);
+    
     removeFileButton.setText(null);
     removeFileButton.setIcon(deleteIcon);
     removeFileButton.setPreferredSize(new Dimension(25, 25));
     removeFileButton.setEnabled(false);
-    removeFileButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        UploadValue selected = (UploadValue) previewList.getSelectedValue();
-        if (selected != null) {
-          List<UploadValue> newValue = new ArrayList<UploadValue>(getImageList());
-          newValue.remove(selected);
-          setImageList(newValue);
-          fileInput.setImage(null);
-        }
-      }
-    });
+    removeFileButton.addActionListener(removeAction);
 
     fileInput.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("image")) {
-          addFileButton.setEnabled(fileInput.getImage() != null);
+//          addFileButton.setEnabled(fileInput.getImage() != null && previewList.getSelectedValue() != null);
+          if (evt.getNewValue() != null) {
+            UploadValue ov = (UploadValue) evt.getOldValue();
+            UploadValue nv = (UploadValue) evt.getNewValue();
+            if (ov == null || !Utils.nullSafeEquals(ov.getResource(), nv.getResource())) {
+              addAction.actionPerformed(new ActionEvent(fileInput, ActionEvent.ACTION_PERFORMED, null, 0));
+            } else {
+              replaceAction.actionPerformed(new ActionEvent(fileInput, ActionEvent.ACTION_PERFORMED, null, 0));
+            }
+          }
         }
       }
     });

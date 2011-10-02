@@ -196,12 +196,12 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
 
   @Override
   public String toString() {
-    return "ImageValue{" +
-            "imageResource=" + resource +
-            ", imageName='" + name + '\'' +
+    return "UploadValue{" +
+            "resource=" + resource +
+            ", name='" + name + '\'' +
             ", image='" + (image != null) + '\'' +
             ", icon='" + (icon != null) + "'" +
-            ", imageFile='" + (file != null) + "'" +
+            ", file='" + (file != null) + "'" +
             '}';
   }
 
