@@ -50,8 +50,8 @@
           </component>
           <component id="e8ea6" class="javax.swing.JLabel">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-              <gridbag top="0" left="5" bottom="0" right="5" weightx="0.0" weighty="0.0"/>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="0.0" weighty="0.0"/>
             </constraints>
             <properties>
               <text value="Single Image:"/>
@@ -59,7 +59,7 @@
           </component>
           <component id="8b396" class="javax.swing.JLabel">
             <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
               <gridbag weightx="0.0" weighty="0.1"/>
             </constraints>
             <properties>
@@ -75,6 +75,21 @@
             <border type="none"/>
             <children/>
           </grid>
+          <component id="8e85a" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="5" bottom="0" right="5" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <text value="Multi Image"/>
+            </properties>
+          </component>
+          <nested-form id="81aae" form-file="org/eknet/swing/imagecomponent/MultiImageInput.form" binding="multiImageInput">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="0" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+          </nested-form>
         </children>
       </grid>
     </children>

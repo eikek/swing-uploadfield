@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.eknet.swing.imagecomponent.ImageInput">
-  <grid id="27dc6" binding="root" layout-manager="BorderLayout" hgap="0" vgap="0">
+  <grid id="27dc6" binding="root" layout-manager="BorderLayout" hgap="5" vgap="0">
     <constraints>
       <xy x="20" y="20" width="500" height="89"/>
     </constraints>
@@ -10,7 +10,7 @@
       <grid id="fb94e" binding="previewPanel" layout-manager="GridBagLayout">
         <constraints border-constraint="West"/>
         <properties/>
-        <border type="empty">
+        <border type="none">
           <size top="0" left="0" bottom="0" right="8"/>
         </border>
         <children>

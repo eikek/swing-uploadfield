@@ -32,8 +32,8 @@ public class IconViewerTest {
 
   public static void main(String[] args) {
     List<URL> icons = getIconURLs();
-    IconViewer v = new IconViewer();
-    v.setIcons(icons);
+    IconsList v = new IconsList();
+    v.setIconElements(icons);
     v.setPreferredSize(new Dimension(400, 250));
     TestPanel.start(v, "Icon Viewer");
     

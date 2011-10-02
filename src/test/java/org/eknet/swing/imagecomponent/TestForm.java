@@ -20,6 +20,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -35,7 +36,8 @@ public class TestForm extends JPanel {
   private JPanel root;
   private JTextField textField1;
   private JPanel imageInputPanel;
-  
+  private MultiImageInput multiImageInput;
+
   private ImageInput imageInput;
 
   public TestForm() {
@@ -44,6 +46,9 @@ public class TestForm extends JPanel {
     imageInput.setPreviewSize(80, 80);
     imageInput.setProposals(IconViewerTest.getIconURLs());
     imageInputPanel.add(imageInput, BorderLayout.CENTER);
+
+    multiImageInput.setProposals(IconViewerTest.getIconURLs());
+    multiImageInput.setPreviewSize(new Dimension(65, 65));
     root.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
     add(root, BorderLayout.CENTER);
 
@@ -58,6 +63,15 @@ public class TestForm extends JPanel {
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("image")) {
           System.out.println("New Image: " + evt.getNewValue());
+        }
+      }
+    });
+    form.multiImageInput.addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("imageList")) {
+          List list = (List) evt.getNewValue();
+          System.out.println("new images [ " + list.size() + " ]:" + list);
         }
       }
     });

@@ -49,6 +49,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.OverlayLayout;
@@ -106,7 +107,7 @@ public class ImageInput extends JPanel {
   private Dimension previewSize = new Dimension(50, 50);
   private final Color normalMessageColor;
   private Color errorMessageColor = Color.red;
-  private IconViewer iconViewer = new IconViewer();
+  private IconsList iconViewer = new IconsList();
   private JDialog dialog;
   private boolean documentListenerMuted = false;
 
@@ -127,7 +128,7 @@ public class ImageInput extends JPanel {
       @Override
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-          URL url = (URL) iconViewer.getIconList().getSelectedValue();
+          URL url = (URL) iconViewer.getSelectedValue();
           if (url != null) {
             ImageValue value = createNewOrCopy();
             value.setImageResource(url);
@@ -172,7 +173,7 @@ public class ImageInput extends JPanel {
             }
           };
           dialog.getContentPane().setLayout(new BorderLayout());
-          dialog.getContentPane().add(iconViewer, BorderLayout.CENTER);
+          dialog.getContentPane().add(new JScrollPane(iconViewer), BorderLayout.CENTER);
         }
         Rectangle bounds = new Rectangle();
         Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
@@ -280,9 +281,6 @@ public class ImageInput extends JPanel {
   }
 
   public JComponent getGlassPane() {
-    if (glassPane == null) {
-      setGlassPane(new SimpleGlassPane());
-    }
     return glassPane;
   }
 
@@ -307,10 +305,10 @@ public class ImageInput extends JPanel {
       for (URL iv : images) {
         this.proposals.add(iv);
       }
-      this.iconViewer.setIcons(proposals);
+      this.iconViewer.setIconElements(proposals);
     } else {
       this.proposals = null;
-      this.iconViewer.setIcons(null);
+      this.iconViewer.setIconElements(null);
     }
     proposalsButton.setVisible(this.proposals != null);
   }
@@ -443,7 +441,9 @@ public class ImageInput extends JPanel {
       SwingUtilities.invokeLater(new Runnable() {
         @Override
         public void run() {
-          getGlassPane().setVisible(true);
+          if (getGlassPane() != null) {
+            getGlassPane().setVisible(true);
+          }
         }
       });
     }
@@ -485,7 +485,9 @@ public class ImageInput extends JPanel {
         setMessage(getLoadingErrorMessage(value), true);
         log.error("Error loading image!", e);
       } finally {
-        getGlassPane().setVisible(false);
+        if (getGlassPane() != null) {
+          getGlassPane().setVisible(false);
+        }
       }
     }
 

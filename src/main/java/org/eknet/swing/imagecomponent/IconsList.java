@@ -16,7 +16,6 @@
 
 package org.eknet.swing.imagecomponent;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -27,12 +26,12 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,74 +42,87 @@ import org.jetbrains.annotations.Nullable;
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 20:44
  */
-public class IconViewer extends JPanel {
-  private static final Logger log = LoggerFactory.getLogger(IconViewer.class);
+public class IconsList extends JList {
+  private static final Logger log = LoggerFactory.getLogger(IconsList.class);
 
-  private JList iconList;
-
-  private Dimension previewSize = new Dimension(25, 25);
+  private Dimension previewSize;
   
-  public IconViewer() {
-    super(new BorderLayout());
+  public IconsList() {
 
-    iconList = new JList();
-    iconList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    iconList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-    iconList.setVisibleRowCount(-1);
-    iconList.setCellRenderer(new DefaultListCellRenderer() {
+    setPreviewSize(new Dimension(25, 25));
+    setModel(new DefaultListModel());
+    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    setLayoutOrientation(JList.HORIZONTAL_WRAP);
+    setVisibleRowCount(-1);
+    setCellRenderer(new DefaultListCellRenderer() {
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setVerticalAlignment(SwingConstants.CENTER);
+
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         setText(null);
-        if (value != null) {
+        if (value instanceof URL) {
+          setToolTipText(Utils.lastUrlPart((URL) value));
           try {
             BufferedImage img = ImageIO.read((URL) value);
             setIcon(new ImageIcon(Scales.scaleIfNecessary(img, previewSize.width, previewSize.height)));
           } catch (IOException e) {
             log.error("Cannot scale image: " + value, e);
           }
+        } else if (value instanceof Icon) {
+          setIcon((Icon) value);
+        } else if (value instanceof ImageValue) {
+          ImageValue iv = (ImageValue) value;
+          setIcon(iv.getIcon());
+          setToolTipText(iv.getImageName());
         } else {
           setIcon(null);
         }
-        setToolTipText(Utils.lastUrlPart((URL) value));
-        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        setPreferredSize(previewSize);
-        setMaximumSize(previewSize);
-        setMinimumSize(previewSize);
+
+        Border border = getBorder();
+        setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5), border));
         return this;
       }
     });
-    add(new JScrollPane(iconList), BorderLayout.CENTER);
   }
 
   
-  public void setIcons(@Nullable Iterable<URL> icons) {
+  public void setIconElements(@Nullable Iterable<?> icons) {
     DefaultListModel model = new DefaultListModel();
     if (icons != null) {
-      for (URL icon : icons) {
+      for (Object icon : icons) {
         model.addElement(icon);
       }
     }
-    iconList.setModel(model);
+    setModel(model);
   }
 
-  public void setSelectionMode(int selectionMode) {
-    iconList.setSelectionMode(selectionMode);
+  public Dimension getPreviewSize() {
+    return previewSize;
   }
 
-  public void addListSelectionListener(ListSelectionListener listener) {
-    iconList.addListSelectionListener(listener);
+  public void setPreviewSize(Dimension previewSize) {
+    this.previewSize = previewSize;
+    Dimension np = new Dimension(previewSize);
+    np.width += 5;
+    np.height += 5;
+    setFixedCellHeight(np.height);
+    setFixedCellWidth(np.width);
+    setPreferredSize(np);
   }
 
-  public void removeListSelectionListener(ListSelectionListener listener) {
-    iconList.removeListSelectionListener(listener);
+  public void addElement(Object urlOrIconOrImageValue) {
+    if (urlOrIconOrImageValue != null) {
+      ((DefaultListModel) getModel()).addElement(urlOrIconOrImageValue);
+    }
   }
 
-  public ListSelectionListener[] getListSelectionListeners() {
-    return iconList.getListSelectionListeners();
+  public void removeElement(Object urlOrIconOrImageValue) {
+    if (urlOrIconOrImageValue != null) {
+      ((DefaultListModel) getModel()).removeElement(urlOrIconOrImageValue);
+    }
   }
 
-  public JList getIconList() {
-    return iconList;
-  }
 }
