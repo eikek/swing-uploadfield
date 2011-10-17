@@ -282,17 +282,17 @@
   <distributionManagement>
     <site>
       <id>eknet.org</id>
-      <url>scp://eknet.org:7611/var/www/eknet/static/projects/swing-imagecomponent/${project.version}</url>
+      <url>scp://eknet.org/var/www/eknet/static/projects/swing-uploadfield/${project.version}</url>
     </site>
     <repository>
       <id>eknet-maven2</id>
       <name>eknet-maven2</name>
-      <url>http://www.eknet.org/artifactory/maven2</url>
+      <url>http://maven.eknet.org/maven2</url>
     </repository>
     <snapshotRepository>
       <id>eknet-maven2</id>
       <name>eknet-maven2</name>
-      <url>http://www.eknet.org/artifactory/maven2</url>
+      <url>http://maven.eknet.org/maven2</url>
     </snapshotRepository>
   </distributionManagement>
   
