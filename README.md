@@ -10,5 +10,5 @@ selecting files but supports data coming from any URL.
 Screenshots
 -----------
 
-![screenshot1](http://www.eknet.org/attachments/download/173)
-![screenshot2](http://www.eknet.org/attachments/download/174)
+![screenshot2](http://www.eknet.org/attachments/174/screenshot2.png)
+![screenshot1](http://www.eknet.org/attachments/173/screenshot1.png)
