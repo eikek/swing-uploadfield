@@ -242,6 +242,15 @@ public class MultiUploadField extends JPanel {
       }
     }
 
+    //evil hack, because i could not get the jlist to correctly repaint their icons...
+    //i have to select each item in order to see the icon.
+    // if the list renders texts, this is not necessary
+    if (uploadList != null && !uploadList.isEmpty()) {
+      for (int i = 0; i < uploadList.size(); i++) {
+        this.previewList.setSelectedIndex(i);
+      }
+    }
+
     //fire change event
     if (!old.equals(files)) {
       firePropertyChange(VALUE_PROPERTY_NAME, old, files);

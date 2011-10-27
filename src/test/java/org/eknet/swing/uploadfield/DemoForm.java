@@ -20,11 +20,14 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+
+import com.google.common.collect.Lists;
 
 import org.alainn.swingbox.test.TestPanel;
 
@@ -81,5 +84,21 @@ public class DemoForm extends JPanel {
       }
     });
     TestPanel.start(form, "Form Preview");
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(2500);
+        } catch (InterruptedException e) {
+        }
+        List<URL> urls = IconViewerTest.getIconURLs();
+        List<UploadValue> values = Lists.newArrayList();
+        for (URL url : urls) {
+          values.add(new UploadValue(url));
+        }
+        System.out.println(">> setting values: " + values);
+        form.multiUploadField.setUploadValueList(values);
+      }
+    }).start();
   }
 }
