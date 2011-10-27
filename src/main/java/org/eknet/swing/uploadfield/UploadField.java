@@ -113,12 +113,12 @@ public class UploadField extends JPanel {
   private Color errorMessageColor = Color.red;
   private IconsList iconViewer = new IconsList();
   private JDialog dialog;
-  private boolean documentListenerMuted = false;
 
   private JComponent glassPane = new SimpleGlassPane();
 
   private final MouseAdapter emptyMouseListener = new MouseAdapter() {};
   private final KeyAdapter emptyKeyListener = new KeyAdapter() {};
+  private final PreviewHandler iconPreviewHandler;
 
   private UploadValue uploadValue;
 
@@ -258,6 +258,12 @@ public class UploadField extends JPanel {
       nameField.getDocument().addDocumentListener(nameFieldOnTypeUpdater);
     } else {
       nameField.addKeyListener(nameFieldEnterUpdater);
+    }
+
+    if (Utils.isMimeUtilAvailable()) {
+      iconPreviewHandler = new MimeIconPreviewHandler();
+    } else {
+      iconPreviewHandler = Utils.allFileHandler();
     }
     
     add(root, -1);
@@ -488,7 +494,6 @@ public class UploadField extends JPanel {
   }
 
   private void updateComponent(UploadValue value) {
-    documentListenerMuted = true;
     if (UploadValue.isNullOrEmpty(value)) {
       resourceField.setText(null);
       nameField.setText(null);
@@ -505,7 +510,6 @@ public class UploadField extends JPanel {
       }
       setMessage(getFileDescription(value), false);
     }
-    documentListenerMuted = false;
   }
 
   public boolean isOptimizedDrawingEnabled() {
@@ -540,6 +544,9 @@ public class UploadField extends JPanel {
         if (image != null) {
           break;
         }
+      }
+      if (image == null) {
+        image = iconPreviewHandler.createImage(value.getResource());
       }
       if (image == null) {
         image = Utils.getMissingImage();

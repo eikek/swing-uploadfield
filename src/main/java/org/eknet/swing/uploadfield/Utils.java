@@ -37,6 +37,8 @@ import javax.swing.filechooser.FileFilter;
  */
 final class Utils {
 
+  private final static boolean mimeUtilAvailable = Utils.class.getClassLoader().getResource("eu/medsea/mimeutil/MimeUtil2.class") != null;
+
   public static String lastUrlPart(URL url) {
     String name = url.toString();
     return name.substring(name.lastIndexOf('/') + 1);
@@ -131,5 +133,9 @@ final class Utils {
         return allFiles;
       }
     };
+  }
+
+  public static boolean isMimeUtilAvailable() {
+    return mimeUtilAvailable;
   }
 }
