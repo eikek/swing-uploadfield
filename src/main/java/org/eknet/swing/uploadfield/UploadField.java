@@ -151,6 +151,23 @@ public class UploadField extends JPanel {
     ON_TYPE, ON_ENTER
   }
 
+  private final ListSelectionListener iconPreviewSelectionListener = new ListSelectionListener() {
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+      if (!e.getValueIsAdjusting()) {
+        URL url = (URL) iconViewer.getSelectedValue();
+        if (url != null) {
+          UploadValue value = createNewOrCopy();
+          value.setResource(url);
+          setUploadValue(value);
+        }
+        if (dialog != null) {
+          dialog.setVisible(false);
+        }
+      }
+    }
+  };
+
   public UploadField() {
     this(NameFieldUpdater.ON_TYPE);
   }
@@ -161,22 +178,7 @@ public class UploadField extends JPanel {
 
     messageLabel.setFont(messageLabel.getFont().deriveFont(10f));
 
-    iconViewer.addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting()) {
-          URL url = (URL) iconViewer.getSelectedValue();
-          if (url != null) {
-            UploadValue value = createNewOrCopy();
-            value.setResource(url);
-            setUploadValue(value);
-          }
-          if (dialog != null) {
-            dialog.setVisible(false);
-          }
-        }
-      }
-    });
+    iconViewer.addListSelectionListener(iconPreviewSelectionListener);
 
     previewButton.setIcon(folderIcon);
     previewButton.setText("...");
@@ -340,6 +342,17 @@ public class UploadField extends JPanel {
       this.glassPane.addKeyListener(emptyKeyListener);
       this.glassPane.setVisible(visible);
     }
+  }
+
+  public void setIconViewer(IconsList iconList) {
+    if (this.iconViewer != null) {
+      this.iconViewer.removeListSelectionListener(iconPreviewSelectionListener);
+    }
+    this.iconViewer = iconList;
+    if (this.iconViewer != null) {
+      this.iconViewer.addListSelectionListener(iconPreviewSelectionListener);
+    }
+    proposalsButton.setVisible(this.iconViewer != null);
   }
 
   public void setProposals(Iterable<URL> images) {
