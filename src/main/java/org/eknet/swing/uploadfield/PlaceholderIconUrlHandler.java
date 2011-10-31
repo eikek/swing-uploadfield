@@ -20,20 +20,32 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-import eu.medsea.mimeutil.MimeType;
+import javax.imageio.ImageIO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 27.10.11 10:16
+ * @since 31.10.11 18:54
  */
-public class MimeIconPreviewHandler extends FilesizeDescriptionUrlHandler {
+public class PlaceholderIconUrlHandler extends FilesizeDescriptionUrlHandler {
+  private static final Logger log = LoggerFactory.getLogger(PlaceholderIconUrlHandler.class);
 
-  private final MimeIconMap iconMap = new MimeIconMap();
+  private BufferedImage image = null;
 
   @Override
   public BufferedImage createImage(URL url) throws IOException {
-    MimeType mime = MimeTypes.getMimeType(url);
-    return iconMap.getIconImage(mime);
+    if (image == null) {
+      URL ir = PlaceholderIconUrlHandler.class.getResource("mime-types/binary.png");
+      try {
+        image = ImageIO.read(ir);
+      } catch (IOException e) {
+        log.error("Unable to load icon image! Return 'missing-image'.", e);
+        image = Utils.getMissingImage();
+      }
+    }
+    return image;
   }
 
 }

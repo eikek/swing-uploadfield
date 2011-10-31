@@ -36,9 +36,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
@@ -48,6 +46,7 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -105,20 +104,19 @@ public class UploadField extends JPanel {
   private static final ImageIcon successIcon = new ImageIcon(UploadField.class.getResource("tick.png"));
   private static final ImageIcon errorIcon = new ImageIcon(UploadField.class.getResource("error.png"));
 
-  private final List<PreviewHandler> previewHandlers = new CopyOnWriteArrayList<PreviewHandler>();
-
   private Set<URL> proposals;
+
   private Dimension previewSize = new Dimension(50, 50);
   private final Color normalMessageColor;
   private Color errorMessageColor = Color.red;
   private IconsList iconViewer = new IconsList();
   private JDialog dialog;
-
   private JComponent glassPane = new SimpleGlassPane();
+
+  private final UrlHandlerList handlers = new UrlHandlerList(previewSize);
 
   private final MouseAdapter emptyMouseListener = new MouseAdapter() {};
   private final KeyAdapter emptyKeyListener = new KeyAdapter() {};
-  private final PreviewHandler iconPreviewHandler;
 
   private UploadValue uploadValue;
 
@@ -231,6 +229,7 @@ public class UploadField extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         setUploadValue(null);
+        onReset();
       }
     });
 
@@ -262,25 +261,36 @@ public class UploadField extends JPanel {
       nameField.addKeyListener(nameFieldEnterUpdater);
     }
 
-    if (Utils.isMimeUtilAvailable()) {
-      iconPreviewHandler = new MimeIconPreviewHandler();
-    } else {
-      iconPreviewHandler = Utils.allFileHandler();
-    }
+    setUseFallbackHandler(true);
     
     add(root, -1);
     setGlassPane(new SimpleGlassPane());
   }
 
   public static UploadField forImageFiles() {
-    UploadField fi = new UploadField();
-    fi.addPreviewHandler(new ImagePreviewHandler());
+    final ImageHandler handler = new ImageHandler();
+    UploadField fi = new UploadField() {
+      @Override
+      protected void customizeFileChooser(JFileChooser fc) {
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(handler.getFileFilter());
+      }
+    };
+    fi.addUrlHandler(handler);
+    fi.setUseFallbackHandler(false);
     return fi;
   }
 
   public static UploadField forAllFiles() {
-    UploadField fi = forImageFiles();
-    fi.addPreviewHandler(Utils.allFileHandler());
+    final ImageHandler handler = new ImageHandler();
+    UploadField fi = new UploadField() {
+      @Override
+      protected void customizeFileChooser(JFileChooser fc) {
+        fc.addChoosableFileFilter(handler.getFileFilter());
+      }
+    };
+    fi.addUrlHandler(handler);
+    fi.setUseFallbackHandler(true);
     return fi;
   }
 
@@ -300,6 +310,7 @@ public class UploadField extends JPanel {
       previewPanel.setPreferredSize(previewSize);
       previewPanel.setMaximumSize(previewSize);
       previewPanel.setMinimumSize(previewSize);
+      handlers.setIconSize(previewSize);
       firePropertyChange("previewSize", old, dim);
     }
   }
@@ -309,22 +320,41 @@ public class UploadField extends JPanel {
     return this.previewSize;
   }
 
-  public void addPreviewHandler(PreviewHandler handler) {
+  public void addUrlHandler(UrlHandler handler) {
     if (handler != null) {
-      previewHandlers.add(handler);
+      handlers.addHandler(handler);
     }
   }
 
-  public void removePreviewHandler(PreviewHandler handler) {
+  public void removeUrlHandler(UrlHandler handler) {
     if (handler != null) {
-      previewHandlers.remove(handler);
+      handlers.removeHander(handler);
     }
   }
 
-  public Iterable<PreviewHandler> getPreviewHandlers() {
-    return previewHandlers;
+  public Iterable<UrlHandler> getPreviewHandlers() {
+    return handlers.copy();
   }
 
+  /* package private*/ UrlHandlerList getHandlerList() {
+    return handlers;
+  }
+
+  protected void onReset() {
+    
+  }
+
+  public void setUseFallbackHandler(boolean flag) {
+    if (flag) {
+      if (Utils.isMimeUtilAvailable()) {
+        handlers.setFallback(new MimeIconPreviewHandler());
+      } else {
+        handlers.setFallback(new PlaceholderIconUrlHandler());
+      }
+    } else {
+      handlers.setFallback(null);
+    }
+  }
   public JComponent getGlassPane() {
     return glassPane;
   }
@@ -386,7 +416,7 @@ public class UploadField extends JPanel {
     boolean loading = false;
     if (uploadValue != null && uploadValue.getResource() != null) {
       if (old == null || (!uploadValue.getResource().equals(old.getResource()))) {
-        new ImageLoadingTask(uploadValue).execute();
+        new UrlLoadingTask(uploadValue).execute();
         loading = true;
       }
     }
@@ -432,30 +462,6 @@ public class UploadField extends JPanel {
   }
 
   /**
-   * Called when the ui is updated with a new value. This method returns
-   * a short description string about the file.
-   * 
-   * @param value
-   * @return
-   */
-  protected String getFileDescription(@NotNull UploadValue value) {
-    StringBuilder buf = new StringBuilder();
-    if (value.getImage() != null && !value.isMissingImage()) {
-      buf.append(value.getImage().getWidth())
-              .append("x")
-              .append(value.getImage().getHeight())
-              .append("px");
-    }
-    if (value.getFile() != null) {
-      if (value.getImage() != null && !value.isMissingImage()) {
-        buf.append("; ");
-      }
-      buf.append(Utils.toSizeString(value.getFile().length()));
-    }
-    return buf.toString();
-  }
-
-  /**
    * Called when no preview image is available. It returns a short
    * error message indicating this to the user.
    * @param value
@@ -479,6 +485,9 @@ public class UploadField extends JPanel {
    */
   protected String getOpenButtonTooltip() {
     return "Click to select a image from disk";
+  }
+
+  protected void customizeFileChooser(JFileChooser fc) {
   }
 
 
@@ -521,7 +530,7 @@ public class UploadField extends JPanel {
         previewButton.setIcon(value.getIcon());
         previewButton.setText(null);
       }
-      setMessage(getFileDescription(value), false);
+      setMessage(value.getDescription(), false);
     }
   }
 
@@ -529,11 +538,14 @@ public class UploadField extends JPanel {
     return false;
   }
 
-  private class ImageLoadingTask extends SwingWorker<UploadValue, Void> {
+  /**
+   * Loads the selected url and retrieves information about the contents.
+   */
+  private class UrlLoadingTask extends SwingWorker<UploadValue, Void> {
 
     private final UploadValue value;
 
-    public ImageLoadingTask(UploadValue value) {
+    public UrlLoadingTask(UploadValue value) {
       this.value = value;
       SwingUtilities.invokeLater(new Runnable() {
         @Override
@@ -551,31 +563,26 @@ public class UploadField extends JPanel {
       if (UploadValue.isNullOrEmpty(value)) {
         return null;
       }
-      BufferedImage image = null;
-      for (PreviewHandler handler : previewHandlers) {
-        image = handler.createImage(value.getResource());
-        if (image != null) {
-          break;
-        }
+      URL url = value.getResource();
+      if (!url.getProtocol().equals("file")) {
+        File tempFile = File.createTempFile("fileInput", ".ext");
+        tempFile.deleteOnExit();
+        Utils.copy(url, tempFile);
+        value.setFile(tempFile);
+      } else {
+        value.setFile(new File(URLDecoder.decode(url.getPath(), "UTF-8")));
       }
-      if (image == null) {
-        image = iconPreviewHandler.createImage(value.getResource());
-      }
+      BufferedImage image = handlers.createImage(url);
       if (image == null) {
         image = Utils.getMissingImage();
       }
       value.setImage(image);
-      if (!value.getResource().getProtocol().equals("file")) {
-        File tempFile = File.createTempFile("fileInput", ".ext");
-        tempFile.deleteOnExit();
-        Utils.copy(value.getResource(), tempFile);
-        value.setFile(tempFile);
-      } else {
-        value.setFile(new File(URLDecoder.decode(value.getResource().getPath(), "UTF-8")));
-      }
       if (image != null) {
         value.setIcon(new ImageIcon(value.getScaledImage(previewSize)));
       }
+
+      value.setName(handlers.getName(url));
+      value.setDescription(handlers.getDescription(value));
       return value;
     }
 

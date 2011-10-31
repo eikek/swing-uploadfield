@@ -20,20 +20,24 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-import eu.medsea.mimeutil.MimeType;
-
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 27.10.11 10:16
+ * @since 31.10.11 18:53
  */
-public class MimeIconPreviewHandler extends FilesizeDescriptionUrlHandler {
-
-  private final MimeIconMap iconMap = new MimeIconMap();
+public abstract class UrlHandlerAdapter implements UrlHandler {
 
   @Override
   public BufferedImage createImage(URL url) throws IOException {
-    MimeType mime = MimeTypes.getMimeType(url);
-    return iconMap.getIconImage(mime);
+    return null;
   }
 
+  @Override
+  public String getName(URL url) {
+    return null;
+  }
+
+  @Override
+  public String getDescription(UploadValue value) {
+    return null;
+  }
 }

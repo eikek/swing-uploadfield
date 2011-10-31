@@ -60,6 +60,7 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
   private BufferedImage image;
   private Icon icon;
   private File file;
+  private String description;
 
   public UploadValue(URL resource, String name) {
     this.resource = resource;
@@ -102,6 +103,16 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
     setImage(null);
     setFile(null);
     setIcon(null);
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    String old = getDescription();
+    this.description = description;
+    changeSupport.firePropertyChange("description", old, description);
   }
 
   public String getName() {

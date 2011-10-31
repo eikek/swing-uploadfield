@@ -16,24 +16,25 @@
 
 package org.eknet.swing.uploadfield;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
-
-import javax.swing.filechooser.FileFilter;
-
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 02.10.11 02:52
+ * @since 31.10.11 19:20
  */
-public interface PreviewHandler {
+public class FilesizeDescriptionUrlHandler extends UrlHandlerAdapter {
 
-  @Nullable
-  BufferedImage createImage(URL url) throws IOException;
+  @Override
+  public String getDescription(UploadValue value) {
+    StringBuilder buf = new StringBuilder();
+    if (value.getFile() != null) {
+      buf.append(Utils.toSizeString(value.getFile().length()));
+    }
+    return buf.toString();
+  }
 
-  @Nullable
-  FileFilter getFileFilter();
-  
+  @Override
+  public String getName(URL url) {
+    return Utils.lastUrlPart(url);
+  }
 }

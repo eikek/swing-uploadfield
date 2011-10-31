@@ -17,14 +17,21 @@
 package org.eknet.swing.uploadfield;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -36,11 +43,11 @@ class FileOpenAction extends AbstractAction {
 
   private final UploadField component;
 
-  private final Iterable<PreviewHandler> previewHandlers;
+  private final UrlHandlerList handlers;
 
   public FileOpenAction(UploadField component) {
     this.component = component;
-    this.previewHandlers = component.getPreviewHandlers();
+    this.handlers = component.getHandlerList();
   }
 
   @Override
@@ -63,7 +70,7 @@ class FileOpenAction extends AbstractAction {
     UploadValue old = component.getUploadValue();
     UploadValue current = null;
     try {
-      current = old != null? old.clone() : new UploadValue();
+      current = old != null ? old.clone() : new UploadValue();
     } catch (CloneNotSupportedException e1) {
       throw new Error("Unreachable code!", e1);
     }
@@ -78,19 +85,12 @@ class FileOpenAction extends AbstractAction {
   protected JFileChooser newFileChooser(String path) {
     JFileChooser fc = new JFileChooser(path);
     fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    fc.setFileFilter(createFilter());
     fc.setMultiSelectionEnabled(false);
+    fc.setAccessory(new PreviewAccessoir(fc));
+    component.customizeFileChooser(fc);
     return fc;
   }
 
-  private FileFilter createFilter() {
-    CompoundFileFilter filter = new CompoundFileFilter();
-    for (PreviewHandler handler : previewHandlers) {
-      filter.addFilter(handler.getFileFilter());
-    }
-    return filter;
-  }
-  
   private Component getSourceComponent(ActionEvent e) {
     Object o = e.getSource();
     if (o instanceof Component) {
@@ -98,4 +98,77 @@ class FileOpenAction extends AbstractAction {
     }
     return null;
   }
+
+
+  private class PreviewAccessoir extends JComponent implements PropertyChangeListener {
+
+    private ImageIcon icon;
+    private File file;
+
+    public PreviewAccessoir(JFileChooser fc) {
+      setPreferredSize(new Dimension(100, 50));
+      fc.addPropertyChangeListener(this);
+    }
+
+    public void loadImage() {
+      if (file == null) {
+        icon = null;
+        return;
+      }
+
+      try {
+        BufferedImage image = handlers.createImage(file.toURI().toURL(), new Dimension(100, 100));
+        icon = new ImageIcon(image);
+      } catch (IOException e) {
+        icon = null;
+      }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      boolean update = false;
+      String prop = evt.getPropertyName();
+
+      //If the directory changed, don't show an image.
+      if (JFileChooser.DIRECTORY_CHANGED_PROPERTY.equals(prop)) {
+        file = null;
+        update = true;
+
+        //If a file became selected, find out which one.
+      } else if (JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(prop)) {
+        file = (File) evt.getNewValue();
+        update = true;
+      }
+
+      //Update the preview accordingly.
+      if (update) {
+        icon = null;
+        if (isShowing()) {
+          loadImage();
+          repaint();
+        }
+      }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+      if (icon == null) {
+        loadImage();
+      }
+      if (icon != null) {
+        int x = getWidth() / 2 - icon.getIconWidth() / 2;
+        int y = getHeight() / 2 - icon.getIconHeight() / 2;
+
+        if (y < 0) {
+          y = 0;
+        }
+
+        if (x < 5) {
+          x = 5;
+        }
+        icon.paintIcon(this, g, x, y);
+      }
+    }
+  }
+
 }

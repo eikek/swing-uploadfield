@@ -29,8 +29,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 
-import javax.swing.filechooser.FileFilter;
-
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 01.10.11 21:09
@@ -107,32 +105,6 @@ final class Utils {
     }
     os.close();
     is.close();
-  }
-
-  private final static FileFilter allFiles = new FileFilter() {
-    @Override
-    public boolean accept(File f) {
-      return true;
-    }
-
-    @Override
-    public String getDescription() {
-      return "*";
-    }
-  };
-
-  public static PreviewHandler allFileHandler() {
-    return new PreviewHandler() {
-      @Override
-      public BufferedImage createImage(URL url) throws IOException {
-        return null;
-      }
-
-      @Override
-      public FileFilter getFileFilter() {
-        return allFiles;
-      }
-    };
   }
 
   public static boolean isMimeUtilAvailable() {

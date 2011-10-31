@@ -40,6 +40,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -113,6 +114,16 @@ public class MultiUploadField extends JPanel {
           }
         };
       }
+
+      @Override
+      protected void customizeFileChooser(JFileChooser fc) {
+        MultiUploadField.this.customizeFileChooser(fc);
+      }
+
+      @Override
+      protected void onReset() {
+        setUploadValueList(null);
+      }
     };
     fileInputContainer.add(fileInput, BorderLayout.CENTER);
 
@@ -164,14 +175,29 @@ public class MultiUploadField extends JPanel {
   }
 
   public static MultiUploadField forImageFiles() {
-    MultiUploadField mf = new MultiUploadField();
-    mf.addPreviewHandler(new ImagePreviewHandler());
+    final ImageHandler handler = new ImageHandler();
+    MultiUploadField mf = new MultiUploadField() {
+      @Override
+      protected void customizeFileChooser(JFileChooser fc) {
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(handler.getFileFilter());
+      }
+    };
+    mf.addUrlHandler(handler);
+    mf.setUseFallbackHandler(false);
     return mf;
   }
 
   public static MultiUploadField forAllFiles() {
-    MultiUploadField mf = forImageFiles();
-    mf.addPreviewHandler(Utils.allFileHandler());
+    final ImageHandler handler = new ImageHandler();
+    MultiUploadField mf = new MultiUploadField() {
+      @Override
+      protected void customizeFileChooser(JFileChooser fc) {
+        fc.addChoosableFileFilter(handler.getFileFilter());
+      }
+    };
+    mf.addUrlHandler(handler);
+    mf.setUseFallbackHandler(true);
     return mf;
   }
 
@@ -201,12 +227,16 @@ public class MultiUploadField extends JPanel {
     return fileInput.getProposals();
   }
 
-  public void addPreviewHandler(PreviewHandler handler) {
-    fileInput.addPreviewHandler(handler);
+  public void addUrlHandler(UrlHandler handler) {
+    fileInput.addUrlHandler(handler);
   }
 
-  public void removePreviewHandler(PreviewHandler handler) {
-    fileInput.removePreviewHandler(handler);
+  public void removeUrlHandler(UrlHandler handler) {
+    fileInput.removeUrlHandler(handler);
+  }
+
+  public void setUseFallbackHandler(boolean flag) {
+    fileInput.setUseFallbackHandler(flag);
   }
 
   public IconsList getPreviewList() {
@@ -217,12 +247,13 @@ public class MultiUploadField extends JPanel {
     return fileInput;
   }
 
-  public void setUploadValueList(final List<UploadValue> uploadList) {
+  public void setUploadValueList(@Nullable final List<UploadValue> uploadList) {
     List<UploadValue> old = new ArrayList<UploadValue>(getUploadValueList());
     List<UploadValue> files = uploadList;
     if (files == null) {
       files = new ArrayList<UploadValue>();
     }
+    previewList.clearSelection();
     
     //remove all not in "files"
     Iterator<UploadValue> iter = this.uploadValueList.iterator();
@@ -245,10 +276,8 @@ public class MultiUploadField extends JPanel {
     //evil hack, because i could not get the jlist to correctly repaint their icons...
     //i have to select each item in order to see the icon.
     // if the list renders texts, this is not necessary
-    if (uploadList != null && !uploadList.isEmpty()) {
-      for (int i = 0; i < uploadList.size(); i++) {
-        this.previewList.setSelectedIndex(i);
-      }
+    for (int i = 0; i < previewList.getModel().getSize(); i++) {
+      this.previewList.setSelectedIndex(i);
     }
 
     //fire change event
@@ -267,6 +296,9 @@ public class MultiUploadField extends JPanel {
       clone.add(new UploadValue(val));
     }
     return clone;
+  }
+
+  protected void customizeFileChooser(JFileChooser fc) {
   }
 }
 
