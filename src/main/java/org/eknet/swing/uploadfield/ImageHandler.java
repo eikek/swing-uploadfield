@@ -44,6 +44,9 @@ public class ImageHandler extends FilesizeDescriptionUrlHandler {
   private final FileFilter fileFilter = new FileFilter() {
     @Override
     public boolean accept(File f) {
+      if (f.isDirectory()) {
+        return true;
+      }
       try {
         String ext = extractExtension(f.toURI().toURL());
         return extensions.contains(ext);
