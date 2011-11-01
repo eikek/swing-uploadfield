@@ -578,10 +578,11 @@ public class UploadField extends JPanel {
       }
       value.setImage(image);
       if (image != null) {
-        value.setIcon(new ImageIcon(value.getScaledImage(previewSize)));
+        value.setIcon(new ImageIcon(Scales.scaleIfNecessary(image, previewSize.width, previewSize.height)));
       }
-
-      value.setName(handlers.getName(url));
+      if (value.getName() == null) {
+        value.setName(handlers.getName(url));
+      }
       value.setDescription(handlers.getDescription(value));
       return value;
     }

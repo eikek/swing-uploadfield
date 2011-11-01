@@ -91,18 +91,15 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
   public void setResource(URL resource) {
     URL old = getResource();
     this.resource = resource;
-    changeSupport.firePropertyChange("imageResource", old, resource);
-    if (resource != null) {
-      try {
-        setName(URLDecoder.decode(Utils.lastUrlPart(resource), "UTF-8"));
-      } catch (UnsupportedEncodingException e) {
-        //oops
-        setName(Utils.lastUrlPart(resource));
-      }
-    }
     setImage(null);
     setFile(null);
     setIcon(null);
+    changeSupport.firePropertyChange("resource", old, resource);
+  }
+
+  public void setResourceAndName(URL resource) {
+    setResource(resource);
+    setName(Utils.lastUrlPart(resource));
   }
 
   public String getDescription() {
@@ -122,7 +119,7 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
   public void setName(String name) {
     String old = getName();
     this.name = name;
-    changeSupport.firePropertyChange("imageName", old, name);
+    changeSupport.firePropertyChange("name", old, name);
   }
 
   public BufferedImage getImage() {
@@ -133,20 +130,6 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
     BufferedImage old = getImage();
     this.image = image;
     changeSupport.firePropertyChange("image", old, image);
-  }
-
-  @NotNull
-  public BufferedImage getScaledImage(int maxWidth, int maxHeight) throws IOException {
-    final BufferedImage img = getImage();
-    if (img == null) {
-      throw new IllegalStateException("Cannot read image from url: " + resource);
-    }
-    return Scales.scaleIfNecessary(img, maxWidth, maxHeight);
-  }
-
-  @NotNull
-  public BufferedImage getScaledImage(Dimension maxWidthAndHeight) throws IOException {
-    return getScaledImage(maxWidthAndHeight.width, maxWidthAndHeight.height);
   }
 
   public boolean isMissingImage() {
@@ -160,7 +143,7 @@ public final class UploadValue implements Cloneable, Comparable<UploadValue> {
   public void setFile(@Nullable File file) {
     File old = getFile();
     this.file = file;
-    changeSupport.firePropertyChange("imageFile", old, file);
+    changeSupport.firePropertyChange("file", old, file);
   }
 
   public Icon getIcon() {

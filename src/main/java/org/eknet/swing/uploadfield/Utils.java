@@ -26,8 +26,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -39,7 +41,12 @@ final class Utils {
 
   public static String lastUrlPart(URL url) {
     String name = url.toString();
-    return name.substring(name.lastIndexOf('/') + 1);
+    name = name.substring(name.lastIndexOf('/') + 1);
+    try {
+      return URLDecoder.decode(name, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException("No support for UTF-8?!", e);
+    }
   }
 
   public static boolean nullSafeEquals(Object v1, Object v2) {
