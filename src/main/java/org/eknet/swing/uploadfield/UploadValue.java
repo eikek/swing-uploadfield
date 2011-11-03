@@ -16,209 +16,47 @@
 
 package org.eknet.swing.uploadfield;
 
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 
 import javax.swing.Icon;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The value of the {@link UploadField} and {@link MultiUploadField} components.
- * <p/>
- * Only two fields are really set from user interaction, while the others are filled when
- * processing the input in the {@link UploadField}. The user can set the {@link #resource}
- * and {@link #name} fields. Then {@link PreviewHandler}s are processing the URL to create
- * a preview image, which is added to this value. Second, the input is stored to a file,
- * which may be temporary or not, depending on the selection. If a file from the local
- * file system is selected, this file is set. If the data is not coming from the local
- * file system (like from a http://... url), the data is stored to a temprary file. Then
- * to create a small preview image, a {@link Icon} is generated which is also stored in
- * this object.
- * <p/>
- * If no preview image could be generated, the image is set with a "missing image"
- * placeholder. Whether this is the case can be queried by {@link #isMissingImage()}.
- * 
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
- * @since 01.10.11 15:39
+ * @since 03.11.11 23:18
  */
-public final class UploadValue implements Cloneable, Comparable<UploadValue> {
+public interface UploadValue {
 
-  private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+  URL getResource();
 
-  private URL resource;
-  private String name;
+  void setResource(URL resource);
 
-  private BufferedImage image;
-  private Icon icon;
-  private File file;
-  private String description;
+  String getDescription();
 
-  public UploadValue(URL resource, String name) {
-    this.resource = resource;
-    this.name = name;
-  }
+  void setDescription(String description);
 
-  public UploadValue(URL imageResource) {
-    this.resource = imageResource;
-  }
+  String getName();
 
-  public UploadValue(UploadValue value) {
-    if (value != null) {
-      this.name = value.getName();
-      this.resource = value.getResource();
-      this.image = value.getImage();
-      this.icon = value.getIcon();
-      this.file = value.getFile();
-    }
-  }
+  void setName(String name);
 
-  public UploadValue() {
-  }
+  BufferedImage getImage();
 
-  public URL getResource() {
-    return resource;
-  }
+  void setImage(@Nullable BufferedImage image);
 
-  public void setResource(URL resource) {
-    URL old = getResource();
-    this.resource = resource;
-    setImage(null);
-    setFile(null);
-    setIcon(null);
-    changeSupport.firePropertyChange("resource", old, resource);
-  }
+  File getFile();
 
-  public void setResourceAndName(URL resource) {
-    setResource(resource);
-    setName(Utils.lastUrlPart(resource));
-  }
+  void setFile(@Nullable File file);
 
-  public String getDescription() {
-    return description;
-  }
+  Icon getIcon();
 
-  public void setDescription(String description) {
-    String old = getDescription();
-    this.description = description;
-    changeSupport.firePropertyChange("description", old, description);
-  }
+  void setIcon(@Nullable Icon icon);
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    String old = getName();
-    this.name = name;
-    changeSupport.firePropertyChange("name", old, name);
-  }
-
-  public BufferedImage getImage() {
-    return image;
-  }
-
-  public void setImage(@Nullable BufferedImage image) {
-    BufferedImage old = getImage();
-    this.image = image;
-    changeSupport.firePropertyChange("image", old, image);
-  }
-
-  public boolean isMissingImage() {
-    return getImage() == Utils.getMissingImage();
-  }
-
-  public File getFile() {
-    return file;
-  }
-
-  public void setFile(@Nullable File file) {
-    File old = getFile();
-    this.file = file;
-    changeSupport.firePropertyChange("file", old, file);
-  }
-
-  public Icon getIcon() {
-    return icon;
-  }
-
-  public void setIcon(@Nullable Icon icon) {
-    Icon old = getIcon();
-    this.icon = icon;
-    changeSupport.firePropertyChange("icon", old, icon);
-  }
-
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    if (listener != null) {
-      changeSupport.addPropertyChangeListener(listener);
-    }
-  }
-
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
-    if (listener != null) {
-      changeSupport.removePropertyChangeListener(listener);
-    }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    UploadValue that = (UploadValue) o;
-
-    if (name != null ? !name.equals(that.name) : that.name != null) return false;
-    if (resource != null ? !resource.equals(that.resource) : that.resource != null) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = resource != null ? resource.hashCode() : 0;
-    result = 31 * result + (name != null ? name.hashCode() : 0);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return "UploadValue{" +
-            "resource=" + resource +
-            ", name='" + name + '\'' +
-            ", image='" + (image != null) + '\'' +
-            ", icon='" + (icon != null) + "'" +
-            ", file='" + (file != null) + "'" +
-            '}';
-  }
-
-  @SuppressWarnings({"CloneDoesntCallSuperClone"})
-  @Override
-  public UploadValue clone() throws CloneNotSupportedException {
-    return new UploadValue(this);
-  }
-
-  @Override
-  public int compareTo(UploadValue o) {
-    if (isNullOrEmpty(o)) {
-      return -1;
-    }
-    if (isNullOrEmpty(this)) {
-      return +1;
-    }
-    return resource.toString().compareTo(o.resource.toString());
-  }
-
-  public static boolean isNullOrEmpty(UploadValue value) {
-    return value == null
-            || value.getResource() == null
-            && (value.getName() == null || "".equals(value.getName().trim()));
-  }
+  /**
+   * Called if the upload field cannot determine a preview
+   * image.
+   */
+  void setMissingIcon(int w, int h);
 }

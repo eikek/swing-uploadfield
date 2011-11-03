@@ -90,16 +90,14 @@ final class Utils {
     return mb.toString() + " " + unit;
   }
 
-  private static BufferedImage missingImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-  static {
-    Graphics2D g = missingImage.createGraphics();
+  public static BufferedImage getMissingImage(int w, int h) {
+    BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = img.createGraphics();
     g.setColor(Color.black);
     int gap = 20;
-    g.drawLine(gap, gap, missingImage.getWidth() - gap, missingImage.getHeight() - gap);
-    g.drawLine(missingImage.getWidth() - gap, gap, gap, missingImage.getHeight() - gap);
-  }
-  public static BufferedImage getMissingImage() {
-    return missingImage;
+    g.drawLine(gap, gap, img.getWidth() - gap, img.getHeight() - gap);
+    g.drawLine(img.getWidth() - gap, gap, gap, img.getHeight() - gap);
+    return img;
   }
 
   public static void copy(URL in, File out) throws IOException {

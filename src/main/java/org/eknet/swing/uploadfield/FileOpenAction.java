@@ -68,12 +68,8 @@ class FileOpenAction extends AbstractAction {
   private void pushFileToComponent(File f) {
     prefs.put("FileOpenAction.lastLocation", f.getAbsolutePath());
     UploadValue old = component.getUploadValue();
-    UploadValue current = null;
-    try {
-      current = old != null ? old.clone() : new UploadValue();
-    } catch (CloneNotSupportedException e1) {
-      throw new Error("Unreachable code!", e1);
-    }
+    DefaultUploadValue current = null;
+    current = old != null ? new DefaultUploadValue(old) : new DefaultUploadValue();
     try {
       current.setResource(f.toURI().toURL());
       component.setUploadValue(current);

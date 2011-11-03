@@ -94,7 +94,7 @@ public class DemoForm extends JPanel {
         List<URL> urls = IconViewerTest.getIconURLs();
         List<UploadValue> values = Lists.newArrayList();
         for (URL url : urls) {
-          values.add(new UploadValue(url, "testname"));
+          values.add(new DefaultUploadValue(url, "testname"));
         }
         System.out.println(">> setting values: " + values);
         form.multiUploadField.setUploadValueList(values);

@@ -134,7 +134,7 @@ public class MultiUploadField extends JPanel {
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
           removeFileButton.setEnabled(previewList.getSelectedValue() != null);
-          UploadValue value = (UploadValue) previewList.getSelectedValue();
+          DefaultUploadValue value = (DefaultUploadValue) previewList.getSelectedValue();
           if (value != null) {
             fileInput.setUploadValue(value);
           }
@@ -293,7 +293,7 @@ public class MultiUploadField extends JPanel {
   private List<UploadValue> cloneList() {
     List<UploadValue> clone = new ArrayList<UploadValue>(this.uploadValueList.size());
     for (UploadValue val : this.uploadValueList) {
-      clone.add(new UploadValue(val));
+      clone.add(new DefaultUploadValue(val));
     }
     return clone;
   }

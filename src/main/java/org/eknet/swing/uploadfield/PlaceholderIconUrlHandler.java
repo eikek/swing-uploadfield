@@ -41,8 +41,7 @@ public class PlaceholderIconUrlHandler extends FilesizeDescriptionUrlHandler {
       try {
         image = ImageIO.read(ir);
       } catch (IOException e) {
-        log.error("Unable to load icon image! Return 'missing-image'.", e);
-        image = Utils.getMissingImage();
+        log.error("Unable to load icon image!", e);
       }
     }
     return image;

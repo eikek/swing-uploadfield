@@ -155,7 +155,7 @@ public class UploadField extends JPanel {
       if (!e.getValueIsAdjusting()) {
         URL url = (URL) iconViewer.getSelectedValue();
         if (url != null) {
-          UploadValue value = createNewOrCopy();
+          DefaultUploadValue value = createNewOrCopy();
           value.setResource(url);
           setUploadValue(value);
         }
@@ -241,7 +241,7 @@ public class UploadField extends JPanel {
           if (url == null || "".equals(url.trim())) {
             setUploadValue(null);
           } else {
-            UploadValue value = createNewOrCopy();
+            DefaultUploadValue value = createNewOrCopy();
             try {
               if (!url.contains(":/")) {
                 url = new File(url).toURI().toURL().toString();
@@ -491,11 +491,11 @@ public class UploadField extends JPanel {
   }
 
 
-  private UploadValue createNewOrCopy() {
+  private DefaultUploadValue createNewOrCopy() {
     if (this.uploadValue == null) {
-      return new UploadValue();
+      return new DefaultUploadValue();
     }
-    return new UploadValue(this.uploadValue);
+    return new DefaultUploadValue(this.uploadValue);
   }
 
   /**
@@ -516,7 +516,7 @@ public class UploadField extends JPanel {
   }
 
   private void updateComponent(UploadValue value) {
-    if (UploadValue.isNullOrEmpty(value)) {
+    if (DefaultUploadValue.isNullOrEmpty(value)) {
       resourceField.setText(null);
       nameField.setText(null);
       previewButton.setIcon(folderIcon);
@@ -532,10 +532,6 @@ public class UploadField extends JPanel {
       }
       setMessage(value.getDescription(), false);
     }
-  }
-
-  public boolean isOptimizedDrawingEnabled() {
-    return false;
   }
 
   /**
@@ -560,7 +556,7 @@ public class UploadField extends JPanel {
 
     @Override
     protected UploadValue doInBackground() throws Exception {
-      if (UploadValue.isNullOrEmpty(value)) {
+      if (DefaultUploadValue.isNullOrEmpty(value)) {
         return null;
       }
       URL url = value.getResource();
@@ -573,12 +569,13 @@ public class UploadField extends JPanel {
         value.setFile(new File(URLDecoder.decode(url.getPath(), "UTF-8")));
       }
       BufferedImage image = handlers.createImage(url);
-      if (image == null) {
-        image = Utils.getMissingImage();
+      if (image != null) {
+        value.setImage(image);
       }
-      value.setImage(image);
       if (image != null) {
         value.setIcon(new ImageIcon(Scales.scaleIfNecessary(image, previewSize.width, previewSize.height)));
+      } else {
+        value.setMissingIcon(previewSize.width, previewSize.height);
       }
       if (value.getName() == null) {
         value.setName(handlers.getName(url));

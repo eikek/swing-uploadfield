@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.medsea.mimeutil.MimeType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
@@ -157,14 +158,14 @@ public class MimeIconMap {
     mimeResourceMap.put("application/zip", ZIP);
   }
 
-  @NotNull
+  @Nullable
   protected BufferedImage createImage(String resource) {
     URL ir = MimeIconMap.class.getResource("mime-types/" + resource);
     try {
       return ImageIO.read(ir);
     } catch (IOException e) {
       log.error("Unable to load icon image! Return 'missing-image'.", e);
-      return Utils.getMissingImage();
+      return null;
     }
   }
 
@@ -181,6 +182,7 @@ public class MimeIconMap {
     return UNKNOWN;
   }
 
+  @Nullable
   public BufferedImage getIconImage(@NotNull MimeType mime) {
     String resource = mapMimeToResource(mime);
     BufferedImage img = imageCache.get(resource);
@@ -188,7 +190,9 @@ public class MimeIconMap {
       return img;
     }
     img = createImage(resource);
-    imageCache.put(resource, img);
+    if (img != null) {
+      imageCache.put(resource, img);
+    }
     return img;
   }
 }

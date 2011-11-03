@@ -81,11 +81,11 @@ public class ImageHandler extends FilesizeDescriptionUrlHandler {
 
   @Override
   public String getDescription(UploadValue value) {
-    if (!UploadValue.isNullOrEmpty(value)) {
+    if (!DefaultUploadValue.isNullOrEmpty(value)) {
       String ext = extractExtension(value.getResource());
       if (extensions.contains(ext)) {
         StringBuilder buf = new StringBuilder();
-        if (value.getImage() != null && !value.isMissingImage()) {
+        if (value.getImage() != null) {
           buf.append(value.getImage().getWidth())
                   .append("x")
                   .append(value.getImage().getHeight())

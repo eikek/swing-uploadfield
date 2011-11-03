@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
  * <ul>
  *   <li>{@link Icon}s,</li>
  *   <li>{@link URL}s to images or</li>
- *   <li>{@link UploadValue}s</li>
+ *   <li>{@link DefaultUploadValue}s</li>
  * </ul>
  * 
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
