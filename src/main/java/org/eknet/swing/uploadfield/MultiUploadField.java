@@ -27,15 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -99,6 +91,14 @@ public class MultiUploadField extends JPanel {
     }
   };
 
+  private final DropHandler dropHandler = new DropHandler() {
+    @Override
+    protected boolean setData(List<UploadValue> data) {
+      setUploadValueList(data);
+      return true;
+    }
+  };
+
   public MultiUploadField() {
     super(new BorderLayout());
 
@@ -125,6 +125,7 @@ public class MultiUploadField extends JPanel {
         setUploadValueList(null);
       }
     };
+    fileInput.setDropEnabled(false);
     fileInputContainer.add(fileInput, BorderLayout.CENTER);
 
     previewList.setPreviewSize(fileInput.getPreviewSize());
@@ -298,7 +299,20 @@ public class MultiUploadField extends JPanel {
     return clone;
   }
 
+  public void setDropEnabled(boolean flag) {
+    if (flag) {
+      setTransferHandler(dropHandler);
+      fileInput.setTransferHandler(dropHandler);
+      previewList.setTransferHandler(dropHandler);
+    } else {
+      setTransferHandler(null);
+      fileInput.setTransferHandler(null);
+      previewList.setTransferHandler(null);
+    }
+  }
+  
   protected void customizeFileChooser(JFileChooser fc) {
   }
+
 }
 

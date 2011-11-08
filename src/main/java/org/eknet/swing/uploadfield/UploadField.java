@@ -24,6 +24,9 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -31,31 +34,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.OverlayLayout;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -149,6 +135,17 @@ public class UploadField extends JPanel {
     ON_TYPE, ON_ENTER
   }
 
+  private final DropHandler dropHandler = new DropHandler() {
+    @Override
+    protected boolean setData(List<UploadValue> data) {
+      if (data.isEmpty()) {
+        return false;
+      }
+      setUploadValue(data.get(0));
+      return true;
+    }
+  };
+
   private final ListSelectionListener iconPreviewSelectionListener = new ListSelectionListener() {
     @Override
     public void valueChanged(ListSelectionEvent e) {
@@ -233,6 +230,7 @@ public class UploadField extends JPanel {
       }
     });
 
+    resourceField.setTransferHandler(null);
     resourceField.addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
@@ -255,6 +253,7 @@ public class UploadField extends JPanel {
         }
       }
     });
+    nameField.setTransferHandler(null);
     if (updateStrategy == NameFieldUpdater.ON_TYPE) {
       nameField.getDocument().addDocumentListener(nameFieldOnTypeUpdater);
     } else {
@@ -448,6 +447,14 @@ public class UploadField extends JPanel {
   @Nullable
   public UploadValue getUploadValue() {
     return uploadValue;
+  }
+
+  public void setDropEnabled(boolean flag) {
+    if (flag) {
+      setTransferHandler(dropHandler);
+    } else {
+      setTransferHandler(null);
+    }
   }
 
   /**

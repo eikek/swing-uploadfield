@@ -47,11 +47,13 @@ public class DemoForm extends JPanel {
   public DemoForm() {
     super(new BorderLayout());
     fileInput = UploadField.forImageFiles();
+    fileInput.setDropEnabled(true);
     fileInput.setPreviewSize(80, 80);
     fileInput.setProposals(IconViewerTest.getIconURLs());
     imageInputPanel.add(fileInput, BorderLayout.CENTER);
 
     multiUploadField.setProposals(IconViewerTest.getIconURLs());
+    multiUploadField.setDropEnabled(true);
     multiUploadField.setPreviewSize(new Dimension(65, 65));
     root.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
     add(root, BorderLayout.CENTER);
