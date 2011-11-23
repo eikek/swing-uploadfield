@@ -75,7 +75,12 @@ public class IconsList extends JList {
           setToolTipText(Utils.lastUrlPart((URL) value));
           try {
             BufferedImage img = ImageIO.read((URL) value);
-            setIcon(new ImageIcon(Scales.scaleIfNecessary(img, previewSize.width, previewSize.height)));
+            if (img == null) {
+              log.error("URL '" + value + "' cannot be read!");
+              setIcon(new ImageIcon(Utils.getMissingImage(previewSize.width, previewSize.height)));
+            } else {
+              setIcon(new ImageIcon(Scales.scaleIfNecessary(img, previewSize.width, previewSize.height)));
+            }
           } catch (IOException e) {
             log.error("Cannot scale image: " + value, e);
           }
