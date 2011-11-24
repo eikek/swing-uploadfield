@@ -30,7 +30,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Alainn Bundles -->
-    <alainn.version>1.2.0-SNAPSHOT</alainn.version>
+    <alainn.version>1.2.1</alainn.version>
   </properties>
 
 
