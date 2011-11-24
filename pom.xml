@@ -22,7 +22,7 @@
 
   <groupId>org.eknet.swing.uploadfield</groupId>
   <artifactId>swing-uploadfield</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
 
   <properties>
