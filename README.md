@@ -5,7 +5,7 @@ A swing component for url inputs with a preview component. Like a web upload fie
 selecting files but supports data coming from any URL.
 
 * [java docs](http://static.eknet.org/projects/swing-uploadfield/latest/apidocs/)
-* [project page](http://www.eknet.org/projects/swing-uploadfield)
+* [project page](https://eknet.org/main/projects/swing-uploadfield/)
 
 Screenshots
 -----------
