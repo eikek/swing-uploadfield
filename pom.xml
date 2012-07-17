@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
+      <version>1.6.4</version>
     </dependency>
 
     <dependency>
@@ -187,6 +187,11 @@
           <artifactId>exec-maven-plugin</artifactId>
           <version>1.2</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -254,15 +259,6 @@
       <url>https://eknet.org/maven2</url>
     </repository>
     <repository>
-      <id>dev.java.net</id>
-      <layout>default</layout>
-      <url>http://download.java.net/maven/2/</url>
-    </repository>
-    <repository>
-      <id>sonatype-oss</id>
-      <url>http://oss.sonatype.org/content/repositories/releases/</url>
-    </repository>
-    <repository>
       <id>maven-raffael</id>
       <name>Raffi's Repo</name>
       <url>http://maven.raffael.ch</url>
@@ -290,5 +286,10 @@
       <url>https://eknet.org/maven2</url>
     </repository>
   </distributionManagement>
+
+  <scm>
+    <connection>scm:git:https://eknet.org/git/eike/swing-uploadfield.git</connection>
+    <url>https://eknet.org/gitr/?r=eike/swing-uploadfield.git</url>
+  </scm>
   
 </project>
